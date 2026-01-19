@@ -1,0 +1,2131 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: #e9ecef;
+    color: #343a40;
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+.wrapper {
+    display: flex;
+    width: 100%;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 25px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background-color: #fff;
+}
+
+.login-container h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+/* Text Berlari*/
+.running-text-container {
+    width: 100%;
+    display: inline-block;
+    overflow: hidden;
+    background: rgba(0, 123, 255, 0.2);
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.running-text {
+    display: inline-block;
+    white-space: nowrap;
+    font-weight: bold;
+    color: #0056b3;
+    animation-name: runningText;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-fill-mode: forwards;
+    min-width: 100%;
+}
+
+@keyframes runningText {
+    from {
+        left: 100%;
+    }
+    to {
+        left: -100%;
+    }
+}
+
+
+.mode-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: inherit;
+}
+
+.sidebar {/* Tampilan sidebar utama */
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100vh;
+    background: linear-gradient(to bottom, #007bff, #0056b3);
+    color: white;
+    padding: 20px;
+    box-shadow: 3px 0 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 1000;
+    transition: left 0.3s ease-in-out;
+}
+
+#reader {
+    width: 100%;
+    max-width: 400px;
+    height: 300px;
+    margin: 20px auto;
+    border: 2px solid #cccccc00;
+    border-radius: 8px;
+}
+
+.sidebar.active {
+    left: 0 !important;
+    z-index: 2000;
+}
+
+.sidebar-header { 
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.logo-img { /* Bandung pride */
+    width: 100px;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+.sidebar-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.8em;
+    font-weight: 700;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.sidebar-nav li {
+    margin-bottom: 8px;
+}
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    color: #e0e7ee;
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 8px;
+    transition: left 0.3s;
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background-color: rgba(255,255,255,0.15);
+    color: #ffffff;
+    transform: translateX(5px);
+}
+
+.sidebar-nav a i {
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+    font-size: 1.2em;
+}
+
+.sidebar.hidden {
+    margin-left: -250px;
+    width: 0;
+    overflow: hidden;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+.main-content.full {
+    margin-left: 0;
+}
+
+
+.main-content {
+    flex-grow: 1;
+    padding: 30px;
+    background-color: #e9ecef;
+    overflow-x: hidden;
+    transition: margin-left 0.3s ease;
+    margin-left: 0 !important;
+}
+
+.main-content.shifted {
+    margin-left: 250px;
+}
+
+.sidebar.active ~ .main-content {
+    margin-left: 250px;
+}
+
+.main-header {
+    background-color: #ffffff;
+    padding: 25px 35px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-bottom: 35px;
+    text-align: center;
+}
+
+/* Tombol kembali ke Pengaturan utama */
+.action-buttons {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 999;
+}
+
+.action-buttons li {
+    list-style: none;
+}
+
+.action-buttons li a {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: linear-gradient(to right, #629cf3, #193ace);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.action-buttons li a i {
+    margin-right: 8px;
+}
+
+.action-buttons li a:hover {
+    background: linear-gradient(to right, #193ace, #629cf3);
+    transform: translateY(-3px);
+}
+
+
+/* Jam Digital */
+.current-time-display {
+    font-size:1.8em;
+    font-weight:bold;
+    color:#0056b3;
+    text-align:center;
+    margin-bottom:20px;
+    padding:10px;
+    background-color:#e0f2f7;
+    border-radius:8px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.05)
+}
+
+.absensi-type-group label {
+    display:inline-block;
+    margin-right:20px;
+    font-weight:normal
+}
+    
+.absensi-type-group input[type="radio"]{
+    width:auto;
+    margin-right:5px;
+    transform:scale(1.1)
+}
+
+/* Jam Analog*/
+.clock-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.analog-clock-wrapper {
+  width: 250px;
+  height: 250px;
+  position: relative;
+  background-color: white; /*  Ganti backround jam analog warna latar */
+  border-radius: 50%;
+  border: 6px solid #000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.analog-clock {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.center-dot {
+  width: 12px;
+  height: 12px;
+  background-color: #313131;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+.hand {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  transform-origin: bottom center;
+  transform: translateX(-50%) rotate(0deg);
+  background-color: #000;
+  border-radius: 4px;
+  z-index: 5;
+}
+
+.hand.hour {
+  width: 6px;
+  height: 60px;
+  background-color: #222;
+}
+
+.hand.minute {
+  width: 4px;
+  height: 80px;
+  background-color: #444;
+}
+
+.hand.second {
+  width: 2px;
+  height: 90px;
+  background-color: red;
+}
+
+.clock-number {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+  color: #000;
+  font-size: 16px;
+}
+
+
+.main-header h2 {
+    margin: 0;
+    color: #0056b3;
+    font-size: 2.5em;
+    font-weight: 700;
+}
+
+.summary-section h3 {
+    text-align: center;
+    color: #0056b3;
+    margin-bottom: 30px;
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+.laporan-ringkasan-title {
+    text-align: center;
+    color: #0056b3;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
+}
+.dashboard-card {
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 110px;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px) scale(1.002);
+    box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+}
+
+.dashboard-card i {
+    font-size: 1.6em;
+    margin-bottom: 6px;
+}
+
+.dashboard-card h4 {
+    margin-top: 0;
+    margin-bottom: 3px;
+    font-size: 0.95em;
+    font-weight: 600;
+}
+
+
+.dashboard-card.total-siswa {
+    background: #c2e6cb;
+    border-color: #a8d7af;
+}
+
+.dashboard-card.total-siswa h4 { color: #155724; }
+.dashboard-card.total-siswa i { color: #28a745; }
+.dashboard-card.total-siswa p { 
+    color: #000000;
+    font-size: 1.2em;
+    font-weight: 800;
+    margin: 0;
+}
+
+.dashboard-card.hadir {
+    background: #8bd0f2;
+    border-color: #84badf;
+}
+
+.dashboard-card.hadir h4 { color: #004085; }
+.dashboard-card.hadir i { color: #007bff; }
+.dashboard-card.hadir p { 
+    color: #000000;
+    font-size: 1.2em;
+    font-weight: 800;
+    margin: 0;
+}
+
+
+.dashboard-card.izin {
+    background: #ffe299;
+    border-color: #f2cf7e;
+}
+
+.dashboard-card.izin h4 { color: #856404; }
+.dashboard-card.izin i { color: #ffc107; }
+.dashboard-card.izin p { 
+    color: #000000;
+    font-size: 1.2em;
+    font-weight: 800;
+    margin: 0;
+}
+
+
+.dashboard-card.sakit {
+    background: #f5c6cb;
+    border-color: #e6b2b7;
+}
+
+.dashboard-card.sakit h4 { color: #721c24; }
+.dashboard-card.sakit i { color: #dc3545; }
+.dashboard-card.sakit p { 
+    color: #000000;
+    font-size: 1.2em;
+    font-weight: 800;
+    margin: 0;
+}
+
+.dashboard-card.alpha {
+    background: #e0b0f0;
+    border-color: #d0a4e6;
+}
+
+.dashboard-card.alpha h4 { color: #6f42c1; }
+.dashboard-card.alpha i { color: #8a2be2; }
+.dashboard-card.alpha p { 
+    color: #000000;
+    font-size: 1.2em;
+    font-weight: 800;
+    margin: 0;
+}
+
+.dashboard-card.pulang-hari-ini {
+    background: #addbe6;
+    border-color: #71b9c9;
+}
+
+.dashboard-card.pulang-hari-ini h4 { color: #005f6b; }
+.dashboard-card.pulang-hari-ini i { color: #007c8a; }
+.dashboard-card.pulang-hari-ini p { 
+    color: #000000;
+    font-size: 1.2em;
+    font-weight: 800;
+    margin: 0;
+}
+
+
+.dashboard-card.terlambat {
+    background: #ffb399;
+    border-color: #ffa688;
+}
+
+.dashboard-card.terlambat h4 { color: #cc5200; }
+.dashboard-card.terlambat i { color: #ff6600; }
+.dashboard-card.terlambat p { 
+    color: #000000;
+    font-size: 1.2em;
+    font-weight: 800;
+    margin: 0;
+}
+
+
+/* =========================
+   Custom Chart LET'S GOOOOO 
+   ========================= */
+
+:root {
+    --hadir-color: #28a745;
+    --terlambat-color: #ff6600;
+    --izin-color: #ffc107;
+    --sakit-color: #dc3545;
+    --alpha-color: #6f42c1;
+}
+
+/* Ukuran dan layout canvas Chart */
+#attendanceChart {
+    width: 100%;
+    max-height: 400px;
+    margin: 20px auto;
+    display: block;
+}
+
+/* Optional: background default kalau kosong */
+.chart-container {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.chart-content-body {
+    max-width: 900px;
+    margin: 0 auto;
+    margin-top: 60px;
+    background-color: #92c0f1;
+    border: 1px solid #dddddd;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+
+.quick-links-section {
+    margin-top: 50px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.quick-links-section h3 {
+    margin-top: 0;
+    text-align: center;
+    color: #0056b3;
+    margin-bottom: 30px;
+    font-size: 1.8em;
+    font-weight: 600;
+}
+.dashboard-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+.dashboard-links a {
+    flex: 1 1 auto;
+    min-width: 200px;
+    background-color: #28a745;
+    color: white;
+    padding: 18px 25px;
+    border-radius: 10px;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+}
+.dashboard-links a i {
+    margin-right: 10px;
+    font-size: 1.3em;
+}
+.dashboard-links a:hover {
+    background-color: #218838;
+    transform: translateY(-5px);
+}
+
+.content-body {
+    max-width: 900px;
+    margin: 0 auto;
+    margin-top: 60px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.laporan-filter-container { /* Kotak Isi Konten Utama*/
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.laporan-filter-form {
+    display: inline-block;
+    background: #f0f0f0;
+    padding: 15px 25px;
+    border-radius: 8px;
+}
+
+.laporan-filter-form .filter-group {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+.laporan-filter-form .filter-group label {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.laporan-filter-form input[type="month"],
+.laporan-filter-form input[type="date"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+
+h2, h3 {
+    color: #0056b3;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.navbar {
+    display: none;
+}
+
+
+form {
+    margin-bottom: 25px;
+    padding: 25px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background-color: #fdfdfd;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+/* Penggaturan*/
+.settings-dashboard {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.settings-card {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 14px 20px;
+    background: #f9f9f9;
+    border: 1px solid #bbbbbb;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #0059ff;
+    font-size: 1.05em;
+    font-weight: 500;
+}
+
+.settings-card:hover {
+    background: #cfcfcf;
+}
+
+.settings-card i {
+    color: #2859fa;
+    margin-right: 10px;
+}
+
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"],
+input[type="date"],
+textarea,
+select,
+input[type="time"] {
+
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccd;
+    border-radius: 6px;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus,
+input[type="time"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+button {
+    background-color: #28a745; /* Warna tombol-tobol umum yang warna 🟢 */
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    margin-right: 10px;
+}
+
+button:hover {
+    background-color: #327e42; /* Transisi warna tombol 🟢 */
+    transform: translateY(-1px);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #ffffff;
+}
+
+th, td {
+    border: 1px solid #e0e0e0;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.95em;
+}
+
+tr:nth-child(even) {
+    background-color: #f8f8f8;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+.message {
+    padding: 15px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    border: 1px solid transparent;
+    text-align: center;
+    font-size: 1.05em;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #33d857;
+    border-color: #c3e6cb;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #b9202f;
+    border-color: #f5c6cb;
+}
+
+.message.info {
+    background-color: #d1ecf1;
+    color: #1ea9c2;
+    border-color: #bee5eb;
+}
+
+.no-data {
+    text-align: center;
+    color: #777;
+    padding: 25px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #fcfcfc;
+    margin-top: 20px;
+    font-style: italic;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #e0e0e0;
+    margin: 40px 0;
+}
+
+.attendance-options label {
+    display: inline-block;
+    margin-right: 15px;
+    font-weight: normal;
+}
+.attendance-options input[type="radio"] {
+    width: auto;
+    margin-right: 8px;
+    transform: scale(1.1);
+}
+
+.action-link {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 0 5px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.action-link.edit-link { /* Warna tombol untuk edit table */
+    background-color: #007bff;
+    color: white;
+}
+.action-link.edit-link:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.action-link.delete-link { /* Warna tombol untuk hapus table */
+    background-color: #dc3545;
+    color: white;
+}
+.action-link.delete-link:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+.sidebar-toggle { /* Tombol pop-up garis 3, bukan biru */
+    display: block; 
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #258eff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.sidebar-toggle:hover { /* Warna transisi garis 3*/
+    color: #ffffff;
+    background-color: #80c2ff;
+}
+
+.sidebar-toggle.active { /* Tampilan untuk tombol garis 3 (aktif) */
+    left: 270px; 
+    transition: left 0.3s ease;
+    background-color: #80c2ff;
+}
+
+/* Menu pengganti Sidebar, Ribbon*/
+.ribbon-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4); /* Transparan hitam */
+    backdrop-filter: blur(4px);
+    padding: 10px 0;
+    display: flex;
+    justify-content: center;
+    z-index: 999;
+    transition: top 0.3s ease;
+}
+
+.ribbon-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.ribbon-nav ul li {
+    margin: 0 15px;
+}
+
+.ribbon-nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 0;
+    display: inline-block;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.3s ease;
+}
+
+.ribbon-nav ul li a:hover {
+    border-bottom: 2px solid #ffffff;
+}
+
+.ribbon-nav .active {
+    border-bottom: 2px solid #ffffff;
+}
+
+.report-table-container {
+    overflow-x: auto; 
+    margin-top: 20px;
+    border: 1px solid #000;
+    border-radius: 0;
+    box-shadow: none;
+    max-width: 100%; 
+    background-color: #007bff;
+}
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+}
+.report-table th, .report-table td {
+    border: 1px solid #e0e0e0;
+    padding: 8px 12px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    color: #000;
+}
+.report-table thead th {
+    background-color: #7e7e7e;
+    color: #ffffff;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.95em;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.report-table thead tr:nth-child(2) th {
+    top: 30px; 
+    z-index: 20;
+    background-color: #7c7c7c; 
+}
+
+
+.report-table th.fixed-col-name,
+.report-table td.fixed-col-name {
+    position: sticky;
+    left: 0;
+    z-index: 30; 
+    text-align: left; 
+    min-width: 100px; 
+    max-width: 250px; 
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    box-shadow: 2px 0 3px rgba(0,0,0,0.1); 
+}
+.report-table th.fixed-col-nis,
+.report-table td.fixed-col-nis {
+    position: sticky;
+    left: 150px; 
+    z-index: 30;
+    text-align: left; 
+    width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 2px 0 3px rgba(0, 0, 0, 0); 
+}
+
+.print-button { /* Tombol Print Absensi*/
+    background-color: #17a2b8;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.print-button:hover {
+    background-color: #138496;
+    transform: translateY(-1px);
+}
+
+#exportToExcelBtn { /* Tombol Export ke Excel (spreadsheet)*/
+    background-color: #17b85a;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#exportToExcelBtn:hover {
+    background-color: #0c7939;
+    transform: translateY(-1px);
+}
+
+.holiday-cell {
+    background-color: rgb(240, 128, 128); /* Warna hari libur */
+    color: #000000; 
+    font-weight: bold;
+}
+
+.future-date-cell {
+    background-color: #ffffff; /* Table laporan absensi untuk hari yang akan datang */
+    color: #6c757d; 
+    font-style: italic;
+}
+
+.report-summary-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+.summary-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: none;
+    flex: 1 1 calc(33% - 40px);
+    min-width: 250px;
+    color: #000;
+}
+.summary-card h4 {
+    color: #343a40;
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+}
+.summary-card p {
+    font-size: 1.6em;
+    font-weight: bold;
+    color: #212529;
+    margin: 0;
+}
+.summary-card.keterlambatan-summary,
+.summary-card.total-waktu-summary,
+.summary-card.unique-late-summary {
+    background: none;
+    border-color: #e0e0e0;
+}
+
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.loading-overlay.show {
+    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #fff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 15s linear infinite;
+    margin-bottom: 10px;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+/* MODE HITAMMMM */
+
+html.dark-mode body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: #000000;
+    color: #343a40;
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+html.dark-mode .wrapper {
+    display: flex;
+    width: 100%;
+}
+
+html.dark-mode .login-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 25px;
+    border: 1px solid #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background-color: #000000;
+}
+
+html.dark-mode .login-container h2 {
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 25px;
+}
+
+/* Text Berlari*/
+html.dark-mode .running-text-container {
+    width: 100%;
+    overflow: hidden;
+    background: rgba(100, 100, 100, 0.2);
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+html.dark-mode .running-text {
+    display: inline-block;
+    white-space: nowrap;
+    font-weight: bold;
+    color: #ffffff;
+    animation-name: runningText;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes runningText {
+    from { transform: translateX(100%); }
+    to { transform: translateX(-100%); }
+}
+
+
+html.dark-mode mode-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: inherit;
+}
+
+html.dark-mode .sidebar {/* Tampilan sidebar utama */
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100vh;
+    background: linear-gradient(to bottom, #525151, #000000);
+    color: rgb(0, 0, 0);
+    padding: 20px;
+    box-shadow: 3px 0 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 1000;
+    transition: left 0.3s ease-in-out;
+}
+
+html.dark-mode #reader {
+    width: 100%;
+    max-width: 400px;
+    height: 300px;
+    margin: 20px auto;
+    border: 2px solid #00000000;
+    border-radius: 8px;
+}
+
+html.dark-mode .sidebar.active {
+    left: 0 !important;
+    z-index: 2000;
+    background-color: #fff;
+    color: #000;
+}
+
+html.dark-mode .sidebar-header { 
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+html.dark-mode .logo-img { /* Bandung pride */
+    width: 100px;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+html.dark-mode .sidebar-header h3 {/* Title Sidebar */
+    color: rgb(177, 177, 177);
+    margin: 0;
+    font-size: 1.8em;
+    font-weight: 700;
+}
+
+html.dark-mode .sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+}
+
+html.dark-mode .sidebar-nav li {
+    margin-bottom: 8px;
+}
+
+html.dark-mode .sidebar-nav a { /* Icon untuk Sidebar*/
+    display: flex;
+    align-items: center;
+    background-color: #000;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 8px;
+    transition: left 0.3s;
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+html.dark-mode .sidebar-nav a:hover,
+html.dark-mode .sidebar-nav a.active {
+    background-color: rgb(255, 255, 255);
+    color: #000000;
+    transform: translateX(5px);
+}
+
+html.dark-mode .sidebar-nav a i {
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+    font-size: 1.2em;
+}
+
+html.dark-mode .sidebar.hidden {
+    margin-left: -250px;
+    width: 0;
+    overflow: hidden;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+html.dark-mode .main-content.full {
+    margin-left: 0;
+}
+
+
+html.dark-mode .main-content { /* Isi Konten utama (Backround)*/
+    flex-grow: 1;
+    padding: 30px;
+    background: linear-gradient(to bottom, #000000, #353434);
+    overflow-x: hidden;
+    transition: margin-left 0.3s ease;
+    margin-left: 0 !important;
+}
+
+html.dark-mode .main-content.shifted {
+    margin-left: 250px;
+}
+
+html.dark-mode .sidebar.active ~ .main-content {
+    margin-left: 250px;
+}
+
+html.dark-mode .main-header { /* Title Box */
+    background-color: #8a8a8a;
+    padding: 25px 35px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-bottom: 35px;
+    text-align: center;
+}
+
+/* Tombol kembali ke Pengaturan utama */
+html.dark-mode .action-buttons {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 999;
+}
+
+html.dark-mode .action-buttons li {
+    list-style: none;
+}
+
+html.dark-mode .action-buttons li a {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: linear-gradient(to right, #181818, #6e6e6e);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+html.dark-mode .action-buttons li a i {
+    margin-right: 8px;
+}
+
+html.dark-mode .action-buttons li a:hover {
+    background: linear-gradient(to right, #6e6e6e, #b6b6b6);
+    transform: translateY(-3px);
+}
+
+
+/* Jam Digital */
+html.dark-mode .current-time-display {
+    font-size:1.8em;
+    font-weight:bold;
+    color:#000000;
+    text-align:center;
+    margin-bottom:20px;
+    padding:10px;
+    background-color:#b8b8b8;
+    border-radius:8px;
+}
+
+html.dark-mode .absensi-type-group label {
+    display:inline-block;
+    margin-right:20px;
+    font-weight:normal
+}
+    
+html.dark-mode .absensi-type-group input[type="radio"]{
+    width:auto;
+    margin-right:5px;
+    transform:scale(1.1)
+}
+
+/* Jam Analog */
+html.dark-mode .clock-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+html.dark-mode .analog-clock-wrapper {
+  width: 250px;
+  height: 250px;
+  position: relative;
+  background-color:rgb(17, 17, 17); /* Ganti backround jam analog */
+  border-radius: 50%;
+  border: 6px solid  rgb(70, 70, 70);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+html.dark-mode .analog-clock {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+html.dark-mode .center-dot {
+  width: 12px;
+  height: 12px;
+  background-color: #414141;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+html.dark-mode .hand {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  transform-origin: bottom center;
+  transform: translateX(-50%) rotate(0deg);
+  background-color: #000;
+  border-radius: 4px;
+  z-index: 5;
+}
+
+html.dark-mode .hand.hour {
+  width: 6px;
+  height: 60px;
+  background-color: #222;
+}
+
+html.dark-mode .hand.minute {
+  width: 4px;
+  height: 80px;
+  background-color: #444;
+}
+
+html.dark-mode .hand.second {
+  width: 2px;
+  height: 90px;
+  background-color: red;
+}
+
+html.dark-mode .clock-number {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+  color: #fff;
+  font-size: 16px;
+}
+
+html.dark-mode .main-header h2 { /* Font untuk Title Box*/
+    margin: 0;
+    color: #ffffff;
+    font-size: 2.5em;
+    font-weight: 700;
+}
+
+html.dark-mode .summary-section h3 { /* Di dashboard, Data Hari Ini*/
+    text-align: center;
+    color: #d1d1d1;
+    margin-bottom: 30px;
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+html.dark-mode .laporan-ringkasan-title {
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+
+html.dark-mode .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
+}
+
+html.dark-mode .dashboard-card {
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 110px;
+}
+
+html.dark-mode .dashboard-card:hover {
+    transform: translateY(-2px) scale(1.002);
+    box-shadow: 0 5px 12px rgba(92, 92, 92, 0.13);
+}
+
+html.dark-mode .dashboard-card i {
+    font-size: 1.6em;
+    margin-bottom: 6px;
+    color: #868686;
+}
+
+html.dark-mode .dashboard-card h4 {
+    margin-top: 0;
+    margin-bottom: 3px;
+    font-size: 0.95em;
+    font-weight: 600;
+}
+
+html.dark-mode .dashboard-card.total-siswa {
+    background:#000000;
+    border-color: #141414;
+}
+
+html.dark-mode .dashboard-card.total-siswa h4 { color: #505050; }
+html.dark-mode .dashboard-card.total-siswa i { color: #505050; }
+html.dark-mode .dashboard-card.total-siswa p { color: #ffffff;}
+
+html.dark-mode .dashboard-card.hadir {
+    background:#3c5561;
+    border-color: #394352;
+}
+
+html.dark-mode .dashboard-card.hadir h4 { color: #000f2c; }
+html.dark-mode .dashboard-card.hadir i { color: #ffffff; }
+html.dark-mode .dashboard-card.hadir p { color: #000000;}
+
+html.dark-mode .dashboard-card.izin {
+    background: #bebebe;
+    border-color: #aaaaaa;
+}
+
+html.dark-mode .dashboard-card.izin h4 { color: #000; }
+html.dark-mode .dashboard-card.izin i { color: #666666; }
+html.dark-mode .dashboard-card.izin p { color: #000000;}
+
+html.dark-mode .dashboard-card.sakit {
+    background: #f0f0f0;
+    border-color: #cccccc;
+}
+
+html.dark-mode .dashboard-card.sakit h4 { color: #2c9c28; }
+html.dark-mode .dashboard-card.sakit i { color: #26924a; }
+html.dark-mode .dashboard-card.sakit p { color: #000000;}
+
+html.dark-mode .dashboard-card.alpha {
+    background: #d1b4b4;
+    border-color: #c4aaaa;
+}
+
+html.dark-mode .dashboard-card.alpha h4 { color: #4d2e2e; }
+html.dark-mode .dashboard-card.alpha i { color: #810000; }
+html.dark-mode .dashboard-card.alpha p { color: #000000;}
+
+html.dark-mode .dashboard-card.pulang-hari-ini {
+    background: #ffffff;
+    border-color: #e6e6e6;
+}
+
+html.dark-mode .dashboard-card.pulang-hari-ini h4 { color: #000000; }
+html.dark-mode .dashboard-card.pulang-hari-ini i { color: #000000; }
+html.dark-mode .dashboard-card.pulang-hari-ini p { color: #000000;}
+
+html.dark-mode .dashboard-card.terlambat {
+    background: #000000;
+    border-color: #0d0e00;
+}
+
+html.dark-mode .dashboard-card.terlambat h4 { color: #89af00; }
+html.dark-mode .dashboard-card.terlambat i { color: #eeff00; }
+html.dark-mode .dashboard-card.terlambat p { color: #ffffff;}
+
+/* =========================
+   Custom Chart LET'S GOOOOO 
+   ========================= */
+
+html.dark-mode {
+    --hadir-color: #3c5561;
+    --terlambat-color: #000000;
+    --izin-color: #bebebe;
+    --sakit-color: #f0f0f0;
+    --alpha-color: #d1b4b4;
+}
+
+/* Ukuran dan layout canvas Chart */
+html.dark-mode #attendanceChart {
+    width: 100%;
+    max-height: 400px;
+    margin: 20px auto;
+    display: block;
+}
+
+/* Optional: background default kalau kosong */
+html.dark-mode .chart-container {
+    background: #beb5b5;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+html.dark-mode .chart-content-body {
+    max-width: 900px;
+    margin: 0 auto;
+    margin-top: 60px;
+    background-color: #7c7c7c;
+    border: 1px solid #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+html.dark-mode html.dark-mode .quick-links-section {
+    margin-top: 50px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+html.dark-mode .quick-links-section h3 {
+    margin-top: 0;
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 30px;
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+html.dark-mode .dashboard-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+html.dark-mode .dashboard-links a {
+    flex: 1 1 auto;
+    min-width: 200px;
+    background-color: #ffffff;
+    color: white;
+    padding: 18px 25px;
+    border-radius: 10px;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+html.dark-mode .dashboard-links a i {
+    margin-right: 10px;
+    font-size: 1.3em;
+}
+
+html.dark-mode .dashboard-links a:hover {
+    background-color:rgb(56, 56, 56);
+    transform: translateY(-5px);
+}
+
+html.dark-mode .content-body {/* Kotak Isi Konten Utama*/
+    max-width: 900px;
+    margin: 0 auto;
+    margin-top: 60px;
+    background: linear-gradient(to bottom right, #000, #6e6e6e);
+    border: 1px solid #ebebeb;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+html.dark-mode .laporan-filter-container {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #000000;
+}
+
+html.dark-mode .laporan-filter-form {
+    display: inline-block;
+    background: #2c2c2c;
+    color: #000;
+    padding: 15px 25px;
+    border-radius: 8px;
+}
+
+html.dark-mode .laporan-filter-form .filter-group {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+html.dark-mode .laporan-filter-form .filter-group label {
+    font-weight: bold;
+    color:#ffffff;
+    margin-right: 5px;
+}
+
+html.dark-mode .laporan-filter-form input[type="month"],
+html.dark-mode .laporan-filter-form input[type="date"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+
+html.dark-mode h2, html.dark-mode h3 {
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+html.dark-mode .navbar {
+    display: none;
+}
+
+
+html.dark-mode form { /* Untuk mengisi data*/
+    margin-bottom: 25px;
+    padding: 25px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background-color: #555555;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+html.dark-mode .form-group {
+    margin-bottom: 18px;
+}
+
+/* Penggaturan*/
+html.dark-mode .settings-dashboard {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+html.dark-mode .settings-card {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 14px 20px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #333;
+    font-size: 1.05em;
+    font-weight: 500;
+}
+
+html.dark-mode .settings-card:hover {
+    background: #000000;
+    border-color: #ffffff;
+}
+
+html.dark-mode .settings-card i {
+    color: #555;
+    margin-right: 10px;
+}
+
+html.dark-mode label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"],
+input[type="date"],
+textarea,
+select,
+input[type="time"] {
+
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccd;
+    border-radius: 6px;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus,
+input[type="time"]:focus {
+    border-color: #00244b;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+html.dark-mode textarea {
+    resize: vertical;
+    min-height: 80px;
+    color:#000;
+}
+
+html.dark-mode button {
+    background-color: #ffffff; /* Warna tombol-tobol umum  */
+    color: rgb(0, 0, 0);
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    margin-right: 10px;
+}
+
+html.dark-mode button:hover {
+    background-color: #000000; /* Transisi warna tombol umum */
+    color:#fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(110, 110, 110, 0.3);
+}
+
+html.dark-mode table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #000000;
+}
+
+html.dark-mode th, html.dark-mode td {
+    border: 1px solid #e0e0e0;
+    padding: 12px;
+    text-align: left;
+    color: #ffffff;
+}
+
+html.dark-mode th { /* Table head (Kolom)*/
+    background-color: #414141;
+    color: rgb(255, 255, 255);
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.95em;
+}
+
+html.dark-mode tr:nth-child(even) {
+    background-color: #000000;
+}
+
+html.dark-mode tr:hover {
+    background-color: #acacac;
+}
+
+html.dark-mode .message.success {
+    background-color: #ffffff;
+    color: #000000;
+    border-color: #cfcfcf;
+}
+
+html.dark-mode .message.error {
+    background-color: #000;
+    color: #fffb00;
+    border-color: #eeff00;
+}
+
+html.dark-mode .message.info {
+    background-color: #acacac;
+    color: #297580;
+    border-color: #686868;
+}
+
+html.dark-mode .no-data {
+    text-align: center;
+    color: #777;
+    padding: 25px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #fcfcfc;
+    margin-top: 20px;
+    font-style: italic;
+}
+
+html.dark-mode hr {
+    border: 0;
+    border-top: 1px solid #000000;
+    margin: 40px 0;
+}
+
+html.dark-mode .action-link {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 0 5px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+html.dark-mode .action-link.edit-link { /* Warna tombol untuk edit table */
+    background-color: #094f99;
+    color: white;
+}
+html.dark-mode .action-link.edit-link:hover {
+    background-color: #043c77;
+    transform: translateY(-1px);
+}
+
+html.dark-mode .action-link.delete-link { /* Warna tombol untuk hapus table */
+    background-color: #9e1321;
+    color: white;
+}
+
+html.dark-mode .action-link.delete-link:hover {
+    background-color: #3f070c;
+    transform: translateY(-1px);
+}
+
+html.dark-mode .sidebar-toggle { /* Tombol pop-up garis 3, bukan biru */
+    display: block; 
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #000000;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+html.dark-mode .sidebar-toggle:hover { /* Warna transisi garis 3*/
+    color: #333333;
+    background-color: #ffffff;
+}
+
+html.dark-mode .sidebar-toggle.active { /* Tampilan untuk tombol garis 3 (aktif) */
+    left: 270px; 
+    transition: left 0.3s ease;
+    background-color: #ffffff;
+    color: #000000;
+}
+
+/* Laporan Absensi*/
+html.dark-mode .report-table-container {
+    overflow-x: auto; 
+    margin-top: 20px;
+    border: 1px solid #000;
+    border-radius: 0;
+    box-shadow: none;
+    max-width: 100%; 
+    background-color: #000000;
+}
+
+html.dark-mode .report-table th, html.dark-mode .report-table td { /* Table Laporan Absensi*/
+    border: 1px solid #524747;
+    padding: 8px 12px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    color: #ffffff;
+}
+
+html.dark-mode .report-table thead th {
+    background-color: #002a57;
+    color: #ffffff;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.95em;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+html.dark-mode .report-table thead tr:nth-child(2) th {
+    top: 30px; 
+    z-index: 20;
+    background-color: #002A57; 
+}
+
+
+html.dark-mode .report-table th.fixed-col-name,
+html.dark-mode .report-table td.fixed-col-name {
+    position: sticky;
+    left: 0;
+    z-index: 30; 
+    text-align: left; 
+    min-width: 100px; 
+    max-width: 250px; 
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    box-shadow: 2px 0 3px rgba(0,0,0,0.1); 
+}
+
+html.dark-mode .report-table th.fixed-col-nis,
+html.dark-mode .report-table td.fixed-col-nis {
+    position: sticky;
+    left: 150px; 
+    z-index: 30;
+    text-align: left; 
+    width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 2px 0 3px rgba(0, 0, 0, 0); 
+}
+
+html.dark-mode .print-button { /* Tombol Print Absensi*/
+    background-color: #000000;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+html.dark-mode .print-button:hover {
+    background-color: #ffffff;
+    color: #000;
+    transform: translateY(-1px);
+}
+
+html.dark-mode #exportToExcelBtn { /* Tombol Export ke Excel (spreadsheet)*/
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+html.dark-mode #exportToExcelBtn:hover {
+    background-color: #000000;
+    color: white;
+    transform: translateY(-1px);
+}
+
+
+html.dark-mode .holiday-cell {
+    background-color: rgb(109, 0, 0); /* Warna hari libur */
+    color: #000000; 
+    font-weight: bold;
+}
+
+html.dark-mode .future-date-cell {
+    background-color: #ffffff; /* Table laporan absensi untuk hari yang akan datang */
+    color: #000000; 
+    font-style: italic;
+}
+
+html.dark-mode .report-summary-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
+    color: #000;
+    font-style: #000;
+}
+
+html.dark-mode .summary-card {
+    background-color: #ffffff;
+    border: 1px solid #000000;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: none;
+    flex: 1 1 calc(33% - 40px);
+    min-width: 250px;
+    color: #000;
+}
+
+html.dark-mode .summary-card h4 {
+    color: #969696;
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+}
+
+html.dark-mode .summary-card p {
+    font-size: 1.6em;
+    font-weight: bold;
+    color: #000000;
+    margin: 0;
+}
+html.dark-mode .summary-card.keterlambatan-summary,
+html.dark-mode .summary-card.total-waktu-summary,
+html.dark-mode .summary-card.unique-late-summary {
+    background: none;
+    border-color: #e0e0e0;
+}
+
+html.dark-mode .loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+html.dark-mode .spinner {
+    border: 4px solid rgba(78, 78, 78, 0.192);
+    border-top: 4px solid #aaaaaa;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 15s linear infinite;
+    margin-bottom: 10px;
+}
