@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 18 Jan 2026 pada 08.52
+-- Waktu pembuatan: 20 Jan 2026 pada 01.21
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -113,7 +113,8 @@ CREATE TABLE `tb_user` (
 --
 
 INSERT INTO `tb_user` (`id_user`, `nama_lengkap`, `username`, `password`, `role`, `status_aktif`) VALUES
-(0, 'TEST', 'test123', '$2a$12$gkME0i1EYKEWzfuClxzHi.UaEtGXfAHKkuNON/hd45GdwAgRJQFEC', 'admin', 1);
+(2, 'UDIN', 'saha_maneh', '$2y$10$gPfQzGcu.3sY1qMkOK0I9eJmogH/Mq5ihlUKXt9eftX3AbnplN2/y', 'admin', 1),
+(3, 'TEST', 'test123', '$2y$10$VaDO5nHDwYQ500e0XtGp5eE1v6zXEG6yBT2VcIBAfG.sOIYmER04i', 'admin', 1);
 
 --
 -- Indexes for dumped tables
@@ -129,7 +130,8 @@ ALTER TABLE `tb_area_parkir`
 -- Indeks untuk tabel `tb_kendaraan`
 --
 ALTER TABLE `tb_kendaraan`
-  ADD PRIMARY KEY (`id_kendaraan`);
+  ADD PRIMARY KEY (`id_kendaraan`),
+  ADD KEY `fk_kendaraan_id_user` (`id_user`);
 
 --
 -- Indeks untuk tabel `tb_log_aktivitas`
@@ -161,8 +163,24 @@ ALTER TABLE `tb_user`
   ADD PRIMARY KEY (`id_user`);
 
 --
+-- AUTO_INCREMENT untuk tabel yang dibuang
+--
+
+--
+-- AUTO_INCREMENT untuk tabel `tb_user`
+--
+ALTER TABLE `tb_user`
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
 --
+
+--
+-- Ketidakleluasaan untuk tabel `tb_kendaraan`
+--
+ALTER TABLE `tb_kendaraan`
+  ADD CONSTRAINT `fk_kendaraan_id_user` FOREIGN KEY (`id_user`) REFERENCES `tb_user` (`id_user`) ON UPDATE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `tb_log_aktivitas`
