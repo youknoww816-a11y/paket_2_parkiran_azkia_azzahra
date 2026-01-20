@@ -10,7 +10,7 @@ $active_page = 'transaksi_parkir';
 // tapi fungsinya tidak, bentukannya aja.
 
 // Data tiket parkir akan menjabarkan nama, username, plat nomor,tipe kendaraan, warna kendaraan,
-// tanggal dan waktu masuk dan keluar (tergantung), area kendaraan diparkirkan, 
+// tanggal dan waktu masuk dan keluar (tergantung), area kendaraan diparkirkan, status masuk atau keluar parkiran,
 // durasi kendaraan diparkirkan (untuk tiket pulang), info tarif perjam kendaraan diparkirkan (untuk tiket masuk),
 
 // Owner atau pemilik hanya perlu memasukan username dan password, tiket masuk akan langsung dibuat.
