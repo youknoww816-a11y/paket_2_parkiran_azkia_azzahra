@@ -50,6 +50,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_area'])) {
     }
 }
 
+/* ================== HAPUS AREA PARKIR ================== */
+if (isset($_GET['hapus'])) {
+    $id = $_GET['hapus'];
+
+    $stmt = $conn->prepare("DELETE FROM tb_area_parkir WHERE id_area = ?");
+    $stmt->bind_param("i", $id);
+
+    if ($stmt->execute()) {
+        $message = "Area parkir berhasil dihapus";
+        $message_type = "success";
+    } else {
+        $message = "Gagal menghapus area";
+        $message_type = "danger";
+    }
+}
+
 // ================== FILTER STATUS ==================
     $status_filter = $_GET['status'] ?? '';
     $where = '';
@@ -228,7 +244,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_area'])) {
                         <td><?= $row['kapasitas'] ?></td>
                         <td><?= $row['terisi'] ?></td>
                         <td><span class="badge bg-<?= $status_badge ?>"><?= $row['status_final'] ?></span></td>    
-                        <td><button class="btn btn-sm btn-warning"data-bs-toggle="modal"data-bs-target="#edit<?= $row['id_area'] ?>">Update Status</button></td>
+                        <td><button class="btn btn-sm btn-warning"data-bs-toggle="modal"data-bs-target="#edit<?= $row['id_area'] ?>">Update</button>
+                        <a href="area_parkir.php?hapus=<?= $row['id_area'] ?>"class="btn btn-sm btn-danger"onclick="return confirm('Yakin hapus area ini?')">Hapus</a>
+                        </td>
                     </tr>
                     
                     <!-- MODAL -->
