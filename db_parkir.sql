@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 21 Jan 2026 pada 01.40
+-- Waktu pembuatan: 26 Jan 2026 pada 03.55
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -31,8 +31,17 @@ CREATE TABLE `tb_area_parkir` (
   `id_area` int(11) NOT NULL,
   `nama_area` varchar(50) NOT NULL,
   `kapasitas` int(5) NOT NULL,
-  `terisi` int(5) NOT NULL
+  `terisi` int(5) NOT NULL,
+  `status_area_parkir` enum('penuh','tempat kosong masih tersedia','ditutup') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `tb_area_parkir`
+--
+
+INSERT INTO `tb_area_parkir` (`id_area`, `nama_area`, `kapasitas`, `terisi`, `status_area_parkir`) VALUES
+(0, '1MB', 10, 0, 'tempat kosong masih tersedia'),
+(1, '1MA', 26, 1, 'tempat kosong masih tersedia');
 
 -- --------------------------------------------------------
 
@@ -124,7 +133,8 @@ CREATE TABLE `tb_user` (
 INSERT INTO `tb_user` (`id_user`, `nama_lengkap`, `username`, `password`, `role`, `status_aktif`) VALUES
 (2, 'UDIN', 'saha_maneh', '$2y$10$gPfQzGcu.3sY1qMkOK0I9eJmogH/Mq5ihlUKXt9eftX3AbnplN2/y', 'admin', 1),
 (3, 'TEST', 'test123', '$2y$10$VaDO5nHDwYQ500e0XtGp5eE1v6zXEG6yBT2VcIBAfG.sOIYmER04i', 'admin', 1),
-(4, 'SA\'ID', 'bisa_diandalkan', '$2y$10$b5U1Ql0WgaJc4ukwoFX/BOAG5orQf1W7R6r/Jq6b3POsSjz11ZB1G', 'admin', 1);
+(4, 'SA\'ID', 'bisa_diandalkan', '$2y$10$b5U1Ql0WgaJc4ukwoFX/BOAG5orQf1W7R6r/Jq6b3POsSjz11ZB1G', 'admin', 1),
+(5, 'V.S', 'finalstaige2045', '$2y$10$BJrmhFJMsGi1x/m2A/peRO3gVsR5eROOI/tBOplyZKPjTk6U0KMYu', 'owner', 1);
 
 --
 -- Indexes for dumped tables
@@ -186,7 +196,7 @@ ALTER TABLE `tb_kendaraan`
 -- AUTO_INCREMENT untuk tabel `tb_user`
 --
 ALTER TABLE `tb_user`
-  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)

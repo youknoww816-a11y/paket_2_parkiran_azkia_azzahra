@@ -7,7 +7,8 @@ $message = '';
 $message_type = '';
 
 /* ================== TAMBAH AREA PARKIR ================== */
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['tambah_area'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tambah_area'])) {
+
     $nama = $_POST['nama_area'];
     $kapasitas = $_POST['kapasitas'];
     $status = $_POST['status_area'];
@@ -20,16 +21,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['tambah_area'])) {
     $stmt->bind_param("sis", $nama, $kapasitas, $status);
 
     if ($stmt->execute()) {
-        $message = "Area parkir berhasil ditambahkan";
-        $message_type = "success";
+        header("Location: area_parkir.php?msg=tambah_sukses");
     } else {
-        $message = "Gagal menambahkan area parkir";
-        $message_type = "danger";
+        header("Location: area_parkir.php?msg=tambah_gagal");
     }
+    exit;
 }
 
 /* ================== UPDATE STATUS AREA ================== */
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_area'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_area'])) {
+
     $id_area = $_POST['id_area'];
     $status = $_POST['status_area'];
     $kapasitas = $_POST['kapasitas'];
@@ -42,27 +43,61 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_area'])) {
     $stmt->bind_param("sii", $status, $kapasitas, $id_area);
 
     if ($stmt->execute()) {
-        $message = "Area parkir berhasil diperbarui";
-        $message_type = "success";
+        header("Location: area_parkir.php?msg=update_sukses");
     } else {
-        $message = "Gagal memperbarui area";
-        $message_type = "danger";
+        header("Location: area_parkir.php?msg=update_gagal");
     }
+    exit;
 }
 
 /* ================== HAPUS AREA PARKIR ================== */
 if (isset($_GET['hapus'])) {
+
     $id = $_GET['hapus'];
 
     $stmt = $conn->prepare("DELETE FROM tb_area_parkir WHERE id_area = ?");
     $stmt->bind_param("i", $id);
 
     if ($stmt->execute()) {
-        $message = "Area parkir berhasil dihapus";
-        $message_type = "success";
+        header("Location: area_parkir.php?msg=hapus_sukses");
     } else {
-        $message = "Gagal menghapus area";
-        $message_type = "danger";
+        header("Location: area_parkir.php?msg=hapus_gagal");
+    }
+    exit;
+}
+
+// ================== MESSAGE ==================
+if (isset($_GET['msg'])) {
+    switch ($_GET['msg']) {
+        case 'tambah_sukses':
+            $message = "Area parkir berhasil ditambahkan";
+            $message_type = "success";
+            break;
+
+        case 'tambah_gagal':
+            $message = "Gagal menambahkan area parkir";
+            $message_type = "danger";
+            break;
+
+        case 'update_sukses':
+            $message = "Area parkir berhasil diperbarui";
+            $message_type = "success";
+            break;
+
+        case 'update_gagal':
+            $message = "Gagal memperbarui area";
+            $message_type = "danger";
+            break;
+
+        case 'hapus_sukses':
+            $message = "Area parkir berhasil dihapus";
+            $message_type = "success";
+            break;
+
+        case 'hapus_gagal':
+            $message = "Gagal menghapus area";
+            $message_type = "danger";
+            break;
     }
 }
 
@@ -102,7 +137,6 @@ if (isset($_GET['hapus'])) {
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     </head>
-    
     <body>
         <div class="wrapper">
             <main class="main-content">
@@ -146,6 +180,8 @@ if (isset($_GET['hapus'])) {
         </div>
     </div>
                 -->
+        <div class="row">
+                <div class="p-4">
 
         <!-- Filter Status -->
          <div class="card-body">
@@ -163,8 +199,6 @@ if (isset($_GET['hapus'])) {
                 <div class="col-md-4 d-flex align-items-end">
                     <a href="area_parkir.php" class="btn btn-outline-secondary"><i class="fas fa-refresh me-2"></i>Reset Filter</a>
                 </div>
-
-                
         <!-- Modal Form Tambah Area Parkir -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambah"><i class="fas fa-plus"></i> Tambah Area Parkir</button>
@@ -176,7 +210,6 @@ if (isset($_GET['hapus'])) {
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
             <form method="POST">
-                
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah Area Parkir</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -248,44 +281,48 @@ if (isset($_GET['hapus'])) {
                         <a href="area_parkir.php?hapus=<?= $row['id_area'] ?>"class="btn btn-sm btn-danger"onclick="return confirm('Yakin hapus area ini?')">Hapus</a>
                         </td>
                     </tr>
-                    
-                    <!-- MODAL -->
-                     <div class="modal fade" id="edit<?= $row['id_area'] ?>" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                            
-                        <div class="modal-content">
+
+                    <div class="modal fade" id="edit<?= $row['id_area'] ?>" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                
                             <form method="POST">
-                                
-                            <div class="modal-header">
-                                <h5 class="modal-title">Edit Area <?= $row['nama_area'] ?></h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                                
-                            <div class="modal-body">
-                                <input type="hidden" name="id_area" value="<?= $row['id_area'] ?>">
-                                <div class="mb-3">
-                                    <label class="form-label">Kapasitas</label>
-                                    <input type="number" name="kapasitas"class="form-control"value="<?= $row['kapasitas'] ?>" required>
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Edit Area Parkir</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 
+                                <div class="modal-body">
+                                    <input type="hidden" name="id_area" value="<?= $row['id_area'] ?>">
+                                    <div class="mb-3">
+                                        <label>Kapasitas</label>
+                                        <input type="number" name="kapasitas"
+                                        value="<?= $row['kapasitas'] ?>"
+                                        class="form-control" required>
+                                    </div>
+                                    
                                 <div class="mb-3">
-                                    <label class="form-label">Status</label>
+                                    <label>Status</label>
                                     <select name="status_area" class="form-select">
-                                        <option value="tempat kosong masih tersedia">Tersedia</option>
-                                        <option value="penuh">Penuh</option>
-                                        <option value="ditutup">Ditutup</option>
+                                        <option value="tempat kosong masih tersedia"
+                                        <?= $row['status_area_parkir'] == 'tempat kosong masih tersedia' ? 'selected' : '' ?>>Tersedia</option>
+                                        <option value="ditutup"
+                                        <?= $row['status_area_parkir'] == 'ditutup' ? 'selected' : '' ?>>Ditutup</option>
                                     </select>
                                 </div>
                             </div>
                             
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                <button type="submit" name="update_area" class="btn btn-primary">Simpan</button>
+                                <button type="submit" name="update_area" class="btn btn-primary">Update</button>
                             </div>
                         </form>
                     </div>
                 </div>
-            </div>
+            </div>        
+        </div>
+    </div>
+</div>
             
             <?php endwhile; ?>
         </tbody>

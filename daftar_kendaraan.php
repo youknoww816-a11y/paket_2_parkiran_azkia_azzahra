@@ -124,8 +124,12 @@ $data_kendaraan = $conn->query("
     <head>
         <meta charset="UTF-8">
         <title>Daftar Kendaraan</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
         <link rel="stylesheet" href="desain_parkir.css">
     </head>
+
     <body>
         
     <main class="main-content">
@@ -134,86 +138,113 @@ $data_kendaraan = $conn->query("
         <header class="main-header">
             <h2>Manajemen Kendaraan</h2>
         </header>
-        
-        <div class="content-body">
+
+            <!-- TOOLBAR -->
+    <div class="toolbar-layanan">
+        <button id="btnTambah"><i class="fa-solid fa-plus"></i></button>
+
+        <div class="filter-container">
+            <button id="btnFilter"><i class="fa-solid fa-filter"></i></button>
+            <div id="filterMenu" class="filter-menu hidden">
+                <button data-sort="nama_asc">Nama A-Z</button>
+                <button data-sort="nama_desc">Nama Z-A</button>
+                <button data-sort="tanggal_asc">Tanggal Terlama</button>
+                <button data-sort="tanggal_desc">Tanggal Terkini</button>
+            </div>
+        </div>
+
+        <button id="btnRefresh"><i class="fa-solid fa-arrows-rotate"></i></button>
+        <input type="text" id="searchBox" placeholder="Cari...">
+    </div>
+
+<br>        
+
             <?php if ($message): ?>
                 <div class="message <?= $message_type ?>">
                     <?= $message ?>
                 </div>
                 <?php endif; ?>
+
+    <hr>
+        <h3>Daftar Kendaraan</h3>
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Plat</th>
+                    <th>Jenis</th>
+                    <th>Warna</th>
+                    <th>Pemilik</th>
+                    <th>User</th>
+                    <th>Aksi</th>
+                </tr>
                 
-                <form method="POST">
-                    <input type="hidden" name="form_action" value="<?= $form_action ?>">
-                    <input type="hidden" name="id_kendaraan" value="<?= $id_kendaraan ?>">
-                    <input type="hidden" name="pemilik" id="pemilik">
-                    
-                    <div class="form-group">
-                        <label>Plat Nomor</label>
-                        <input type="text" name="plat_nomor" required value="<?= $plat_nomor ?>">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Jenis Kendaraan</label>
-                        <input type="text" name="jenis_kendaraan" required value="<?= $jenis_kendaraan ?>">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Warna</label>
-                        <input type="text" name="warna" required value="<?= $warna ?>">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Nama Pemilik</label>
-                        <input type="text" id="pemilik_view" value="<?= $pemilik ?>" readonly>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>User</label>
-                        <select name="id_user" id="userSelect" required>
-                            <option value="">-- Pilih User --</option>
-                            <?php foreach ($user_list as $u): ?>
-                                <option value="<?= $u['id_user'] ?>"data-nama="<?= $u['nama_lengkap'] ?>"
-                                <?= $u['id_user'] == $id_user ? 'selected' : '' ?>>
-                                <?= $u['id_user'] ?> - <?= $u['username'] ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    
-                    <button type="submit"><?= $form_action === 'edit' ? 'Update' : 'Tambah' ?></button>
-                    <?php if ($form_action === 'edit'): ?>
-                        <button type="button" onclick="window.location='daftar_kendaraan.php'" style="background:#6c757d">Batal</button>
-                    <?php endif; ?>
-                </form>
-                
-                <hr>
-                <h3>Daftar Kendaraan</h3>
-                <table>
+                <?php while ($row = $data_kendaraan->fetch_assoc()): ?>
                     <tr>
-                        <th>ID</th>
-                        <th>Plat</th>
-                        <th>Jenis</th>
-                        <th>Warna</th>
-                        <th>Pemilik</th>
-                        <th>User</th>
-                        <th>Aksi</th>
+                        <td><?= $row['id_kendaraan'] ?></td>
+                        <td><?= $row['plat_nomor'] ?></td>
+                        <td><?= $row['jenis_kendaraan'] ?></td>
+                        <td><?= $row['warna'] ?></td>
+                        <td><?= $row['pemilik'] ?></td>
+                        <td><?= $row['username'] ?></td>
+                        <td><a a class="action-link edit-link" href="?action=edit&id=<?= $row['id_kendaraan'] ?>">Edit</a>
+                        <a class="action-link delete-link" href="?action=delete&id=<?= $row['id_kendaraan'] ?>" onclick="return confirm('Hapus kendaraan?')">Hapus</a></td>
                     </tr>
-                    
-                    <?php while ($row = $data_kendaraan->fetch_assoc()): ?>
-                        <tr>
-                            <td><?= $row['id_kendaraan'] ?></td>
-                            <td><?= $row['plat_nomor'] ?></td>
-                            <td><?= $row['jenis_kendaraan'] ?></td>
-                            <td><?= $row['warna'] ?></td>
-                            <td><?= $row['pemilik'] ?></td>
-                            <td><?= $row['username'] ?></td>
-                            <td><a a class="action-link edit-link" href="?action=edit&id=<?= $row['id_kendaraan'] ?>">Edit</a>
-                            <a class="action-link delete-link" href="?action=delete&id=<?= $row['id_kendaraan'] ?>" onclick="return confirm('Hapus kendaraan?')">Hapus</a></td>
-                        </tr>
-                    <?php endwhile; ?>
-                </table>
-            </div>
+                <?php endwhile; ?>
+            </table>
+        </div>
     </main>
+
+    
+        <!-- MODAL FORM -->
+<div id="modalForm" class="modal hidden">
+    <div class="modal-content">
+        <h3 id="modalTitle">Tambah Kendaraan</h3>
+
+        <form method="POST">
+            <input type="hidden" name="form_action" id="form_action" value="<?= $form_action ?>">
+            <input type="hidden" name="id_kendaraan" id="id_kendaraan" value="<?= $id_kendaraan ?>">
+            <input type="hidden" name="pemilik" id="pemilik">
+
+            <div class="form-group">
+                <label>Plat Nomor</label>
+                <input type="text" name="plat_nomor" id="plat_nomor" required>
+            </div>
+
+            <div class="form-group">
+                <label>Jenis Kendaraan</label>
+                <input type="text" name="jenis_kendaraan" id="jenis_kendaraan" required>
+            </div>
+
+            <div class="form-group">
+                <label>Warna</label>
+                <input type="text" name="warna" id="warna" required>
+            </div>
+
+            <div class="form-group">
+                <label>Nama Pemilik</label>
+                <input type="text" id="pemilik_view" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>User</label>
+                <select name="id_user" id="userSelect" required>
+                    <option value="">-- Pilih User --</option>
+                    <?php foreach ($user_list as $u): ?>
+                        <option value="<?= $u['id_user'] ?>"
+                                data-nama="<?= $u['nama_lengkap'] ?>">
+                            <?= $u['id_user'] ?> - <?= $u['username'] ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button type="submit" id="btnSubmit">Tambah</button>
+                <button type="button" id="btnClose">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
     
     <script>
     const userSelect = document.getElementById('userSelect');
@@ -250,6 +281,76 @@ $data_kendaraan = $conn->query("
         });
     });
     </script>
+
+    <script>
+const modal = document.getElementById('modalForm');
+const btnTambah = document.getElementById('btnTambah');
+const btnClose = document.getElementById('btnClose');
+
+const formAction = document.getElementById('form_action');
+const idKendaraan = document.getElementById('id_kendaraan');
+
+const plat = document.getElementById('plat_nomor');
+const jenis = document.getElementById('jenis_kendaraan');
+const warna = document.getElementById('warna');
+const pemilik = document.getElementById('pemilik');
+const pemilikView = document.getElementById('pemilik_view');
+const userSelect = document.getElementById('userSelect');
+
+const modalTitle = document.getElementById('modalTitle');
+const btnSubmit = document.getElementById('btnSubmit');
+
+/* ================= TOMBOL TAMBAH ================= */
+btnTambah.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+
+    formAction.value = 'add';
+    idKendaraan.value = '';
+
+    plat.value = '';
+    jenis.value = '';
+    warna.value = '';
+    pemilik.value = '';
+    pemilikView.value = '';
+    userSelect.value = '';
+
+    modalTitle.innerText = 'Tambah Kendaraan';
+    btnSubmit.innerText = 'Tambah';
+});
+
+/* ================= TOMBOL EDIT ================= */
+document.querySelectorAll('.edit-link').forEach(btn => {
+    btn.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const row = this.closest('tr');
+
+        modal.classList.remove('hidden');
+
+        formAction.value = 'edit';
+        idKendaraan.value = row.children[0].innerText;
+        plat.value = row.children[1].innerText;
+        jenis.value = row.children[2].innerText;
+        warna.value = row.children[3].innerText;
+        pemilikView.value = row.children[4].innerText;
+
+        modalTitle.innerText = 'Edit Kendaraan';
+        btnSubmit.innerText = 'Update';
+    });
+});
+
+/* ================= CLOSE ================= */
+btnClose.addEventListener('click', () => {
+    modal.classList.add('hidden');
+});
+
+/* ================= AUTO PEMILIK ================= */
+userSelect.addEventListener('change', function () {
+    const nama = this.options[this.selectedIndex].dataset.nama || '';
+    pemilik.value = nama;
+    pemilikView.value = nama;
+});
+</script>
     
 </body>
 </html>
