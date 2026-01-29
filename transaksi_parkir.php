@@ -3,7 +3,10 @@ session_start();
 date_default_timezone_set('Asia/Jakarta');
 include 'koneksi_parkir.php';
 
-$pesan = '';
+$active_page = 'transaksi_parkir';
+$message = '';
+$message_type = '';
+
 $data_tiket = null;
 
 if (isset($_POST['username'])) {
@@ -54,6 +57,21 @@ if (isset($_POST['username'])) {
         // ===================================================
         if (!$parkir || $parkir['status'] == 'keluar') {
 
+        // Ambil area parkir yang masih tersedia
+        $qArea = $conn->query("
+        SELECT id_area 
+        FROM tb_area_parkir 
+        WHERE status_area_parkir = 'tempat kosong masih tersedia'
+        LIMIT 1
+        ");
+        
+        if ($qArea->num_rows == 0) {
+            die("Area parkir penuh.");
+        }
+        
+        $area = $qArea->fetch_assoc();
+        $id_area = $area['id_area'];
+
             $now = date('Y-m-d H:i:s');
 
             $conn->query("
@@ -68,7 +86,7 @@ if (isset($_POST['username'])) {
                     '$now',
                     'masuk',
                     $id_user,
-                    1
+                    $id_area
                 )
             ");
 
@@ -79,54 +97,81 @@ if (isset($_POST['username'])) {
             ];
         }
 
-        // ===================================================
-        // KELUAR PARKIR
-        // ===================================================
-        else {
+// ===================================================
+// KELUAR PARKIR
+// ===================================================
 
-            $masuk  = strtotime($parkir['waktu_masuk']);
-            $keluar = time();
-            $durasi = ceil(($keluar - $masuk) / 3600);
+else {
 
-            if ($durasi < 1) $durasi = 1;
+    $masuk  = strtotime($parkir['waktu_masuk']);
+    $keluar = time();
 
-            // ================= TARIF =================
-            $jenis = strtolower($kendaraan['jenis_kendaraan']);
+    // Hitung durasi jam (dibulatkan ke atas)
+    $durasi = ceil(($keluar - $masuk) / 3600);
+    if ($durasi < 1) $durasi = 1;
 
-            if ($jenis == 'motor') {
-                $total = 2000 + (($durasi - 1) * 2000);
-                $id_tarif = 1;
-            } elseif ($jenis == 'mobil') {
-                $total = 5000 + (($durasi - 1) * 3000);
-                $id_tarif = 2;
-            } else {
-                $total = 6000 + (($durasi - 1) * 5000);
-                $id_tarif = 3;
-            }
+    $jenis = strtolower($kendaraan['jenis_kendaraan']);
+    $total = 0;
 
-            $now = date('Y-m-d H:i:s');
+    // ================= TARIF =================
+    if ($jenis == 'motor') {
 
-            $conn->query("
-                UPDATE tb_transaksi SET
-                    waktu_keluar = '$now',
-                    durasi_jam = $durasi,
-                    biaya_total = $total,
-                    id_tarif = $id_tarif,
-                    status = 'keluar'
-                WHERE id_parkir = {$parkir['id_parkir']}
-            ");
+        $id_tarif = 1;
 
-            $data_tiket = [
-                'mode' => 'KELUAR',
-                'waktu_masuk' => $parkir['waktu_masuk'],
-                'waktu_keluar' => $now,
-                'durasi' => $durasi,
-                'total' => $total,
-                'kendaraan' => $kendaraan
+        if ($durasi <= 24) {
+            $total = 2000 + (($durasi - 1) * 2000);
+            if ($total > 20000) $total = 20000;
+        } else {
+            $total = 20000 + (($durasi - 24) * 2000);
+        }
+
+    } elseif ($jenis == 'mobil') {
+
+        $id_tarif = 2;
+
+        if ($durasi <= 24) {
+            $total = 5000 + (($durasi - 1) * 3000);
+            if ($total > 35000) $total = 35000;
+        } else {
+            $total = 35000 + (($durasi - 24) * 3000);
+        }
+
+    } else {
+
+        $id_tarif = 3;
+
+        if ($durasi <= 24) {
+            $total = 6000 + (($durasi - 1) * 5000);
+            if ($total > 50000) $total = 50000;
+        } else {
+            $total = 50000 + (($durasi - 24) * 5000);
+        }
+    }
+
+    $now = date('Y-m-d H:i:s');
+
+    $conn->query("
+        UPDATE tb_transaksi SET
+            waktu_keluar = '$now',
+            durasi_jam = $durasi,
+            biaya_total = $total,
+            id_tarif = $id_tarif,
+            status = 'keluar'
+        WHERE id_parkir = {$parkir['id_parkir']}
+    ");
+
+    $data_tiket = [
+        'mode' => 'KELUAR',
+        'waktu_masuk' => $parkir['waktu_masuk'],
+        'waktu_keluar' => $now,
+        'durasi' => $durasi,
+        'total' => $total,
+        'kendaraan' => $kendaraan
             ];
         }
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -137,160 +182,144 @@ if (isset($_POST['username'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- CSS -->
+    <link rel="stylesheet" href="desain_parkir.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" href="desain_parkir.css">
 </head>
 
-<body>
-<div class="wrapper">
-<main class="main-content">
+<body>    
+    
+    <div class="wrapper">
+        <main class="main-content">
+            
+        <!-- HEADER -->
+         <header class="main-header"><h2>Transaksi Parkir</h2></header>
 
-    <header class="main-header">
-        <h2>Transaksi Parkir</h2>
-    </header>
-
-    <!-- TOOLBAR -->
-    <div class="toolbar-layanan">
-        <button id="btnTambah"><i class="fa-solid fa-plus"></i></button>
-
-        <div class="filter-container">
-            <button id="btnFilter"><i class="fa-solid fa-filter"></i></button>
-            <div id="filterMenu" class="filter-menu hidden">
-                <button data-sort="nama_asc">Nama A-Z</button>
-                <button data-sort="nama_desc">Nama Z-A</button>
-                <button data-sort="tanggal_asc">Tanggal Terlama</button>
-                <button data-sort="tanggal_desc">Tanggal Terkini</button>
+        <!-- MESSAGE -->
+         <?php if ($message): ?>
+            <div class="message <?= $message_type ?>">
+                <?= $message ?>
             </div>
-        </div>
-
-        <button id="btnRefresh"><i class="fa-solid fa-arrows-rotate"></i></button>
-        <input type="text" id="searchBox" placeholder="Cari...">
+        <?php endif; ?>
+         
+         <div class="content-body">
+        
+    <!-- Jam Analog -->
+     <div class="clock-container">
+        <div class="analog-clock-wrapper">
+            <div class="analog-clock" id="clock">
+                <div class="hand hour" id="hourHand"></div>
+                <div class="hand minute" id="minuteHand"></div>
+                <div class="hand second" id="secondHand"></div>
+                <div class="center-dot"></div>
+                
+    <!-- Angka 1–12 -->
+     <div class="clock-number" data-number="1">1</div>
+     <div class="clock-number" data-number="2">2</div>
+     <div class="clock-number" data-number="3">3</div>
+     <div class="clock-number" data-number="4">4</div>
+     <div class="clock-number" data-number="5">5</div>
+     <div class="clock-number" data-number="6">6</div>
+     <div class="clock-number" data-number="7">7</div>
+     <div class="clock-number" data-number="8">8</div>
+     <div class="clock-number" data-number="9">9</div>
+     <div class="clock-number" data-number="10">10</div>
+     <div class="clock-number" data-number="11">11</div>
+     <div class="clock-number" data-number="12">12</div>
+    
     </div>
+</div>
+<div class="current-time-display">Jam : <span id="current-time"></span></div>
+</div>
 
-    <br>
+<main class="main-content">
+    <!-- FORM INPUT USERNAME -->
+     <form method="POST" style="margin-bottom:20px;">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Masukkan username..." required>
+        
+        <button type="submit">OK</button>
+    </form>
 
-    <!-- TABEL -->
-    <table id="tabelParkir" class="display" width="100%">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Username</th>
-                <th>Nama</th>
-                <th>Preview</th>
-            </tr>
-        </thead>
-        <tbody>
+    <?php if (!empty($data_tiket)): ?>
+    <div class="hasil-transaksi">
 
-        <?php
-        $no = 1;
-        $q = $conn->query("
-            SELECT 
-                t.waktu_masuk,
-                t.waktu_keluar,
-                t.status,
-                t.biaya_total,
-                k.jenis_kendaraan,
-                k.plat_nomor,
-                u.username,
-                u.nama_lengkap
-            FROM tb_transaksi t
-            JOIN tb_kendaraan k ON t.id_kendaraan = k.id_kendaraan
-            JOIN tb_user u ON t.id_user = u.id_user
-            ORDER BY t.id_parkir DESC
-        ");
+        <h3>Detail Transaksi</h3>
 
-        while ($row = $q->fetch_assoc()):
-        ?>
-        <tr>
-            <td><?= $no++ ?></td>
-            <td><?= htmlspecialchars($row['username']) ?></td>
-            <td><?= htmlspecialchars($row['nama_lengkap']) ?></td>
-            <td>
-                <button class="btn-preview"
-                    data-nama="<?= $row['nama_lengkap'] ?>"
-                    data-kendaraan="<?= $row['jenis_kendaraan'] ?>"
-                    data-plat="<?= $row['plat_nomor'] ?>"
-                    data-status="<?= $row['status'] ?>"
-                    data-masuk="<?= $row['waktu_masuk'] ?>"
-                    data-keluar="<?= $row['waktu_keluar'] ?>"
-                    data-total="<?= $row['biaya_total'] ?>"
-                >
-                    <i class="fa fa-eye"></i> Preview
-                </button>
-            </td>
-        </tr>
-        <?php endwhile; ?>
+        <p><strong>Nama:</strong> <?= $data_tiket['kendaraan']['nama_lengkap'] ?></p>
+        <p><strong>Plat:</strong> <?= $data_tiket['kendaraan']['plat_nomor'] ?></p>
+        <p><strong>Jenis:</strong> <?= $data_tiket['kendaraan']['jenis_kendaraan'] ?></p>
 
-        </tbody>
-    </table>
+        <?php if ($data_tiket['mode'] == 'MASUK'): ?>
+            <p><strong>Status:</strong> Masuk Parkir</p>
+            <p><strong>Waktu Masuk:</strong> <?= $data_tiket['waktu_masuk'] ?></p>
 
+        <?php else: ?>
+            <p><strong>Status:</strong> Keluar Parkir</p>
+            <p><strong>Waktu Masuk:</strong> <?= $data_tiket['waktu_masuk'] ?></p>
+            <p><strong>Waktu Keluar:</strong> <?= $data_tiket['waktu_keluar'] ?></p>
+            <p><strong>Durasi:</strong> <?= $data_tiket['durasi'] ?> jam</p>
+            <p><strong>Total Bayar:</strong> Rp <?= number_format($data_tiket['total'],0,',','.') ?></p>
+        <?php endif; ?>
+
+    </div>
+<?php endif; ?>
+        
+       
 </main>
 </div>
 
-<!-- MODAL PREVIEW -->
-<div id="modalPreview" class="my-modal">
-    <div class="bon-content">
-        <span class="close">&times;</span>
-
-        <p>Nama : <span id="p_nama"></span></p>
-        <p>Kendaraan : <span id="p_kendaraan"></span></p>
-        <p>Plat : <span id="p_plat"></span></p>
-        <p>Status : <span id="p_status"></span></p>
-        <p>Masuk : <span id="p_masuk"></span></p>
-
-        <div id="keluarArea" style="display:none;">
-            <p>Keluar : <span id="p_keluar"></span></p>
-            <p>Total : Rp <span id="p_total"></span></p>
-        </div>
-    </div>
-</div>
-
-<!-- JS -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-
 <script>
-$(function(){
+// Jam Digital
+function updateDigitalTime() {
+    const now = new Date();
+    document.getElementById('current-time').textContent = now.toLocaleTimeString('id-ID', { hour12: false });
+}
+setInterval(updateDigitalTime, 1000);
+updateDigitalTime();
 
-    // 1. Inisialisasi DataTable (WAJIB PERTAMA)
-    const table = $('#tabelParkir').DataTable({
-        searching: false,
-        lengthChange: false,
-        info: false
+// Jam Analog
+  function updateClock() {
+    const now = new Date();
+    const seconds = now.getSeconds();
+    const minutes = now.getMinutes();
+    const hours = now.getHours();
+
+    const secondDeg = seconds * 6; // 360 / 60
+    const minuteDeg = minutes * 6 + seconds * 0.1;
+    const hourDeg = ((hours % 12) / 12) * 360 + (minutes / 60) * 30;
+
+    document.getElementById("secondHand").style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
+    document.getElementById("minuteHand").style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
+    document.getElementById("hourHand").style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+
+    const timeStr = now.toLocaleTimeString();
+    document.getElementById("current-time").textContent = timeStr;
+  }
+
+  // Posisi angka secara melingkar
+  function positionClockNumbers() {
+    const numbers = document.querySelectorAll(".clock-number");
+    const centerX = 125;
+    const centerY = 125;
+    const radius = 100;
+
+    numbers.forEach(num => {
+      const value = parseInt(num.dataset.number);
+      const angle = ((value - 3) * 30) * (Math.PI / 180); // -3 agar jam 12 ada di atas
+      const x = centerX + radius * Math.cos(angle);
+      const y = centerY + radius * Math.sin(angle);
+      num.style.left = `${x}px`;
+      num.style.top = `${y}px`;
     });
+  }
 
-    // 2. Search manual dari input "Cari..."
-    $('#searchBox').on('keyup', function () {
-        table.search(this.value).draw();
-    });
-
-    // 3. Tombol preview
-    $('.btn-preview').on('click', function(){
-        $('#modalPreview').fadeIn();
-
-        $('#p_nama').text($(this).data('nama'));
-        $('#p_kendaraan').text($(this).data('kendaraan'));
-        $('#p_plat').text($(this).data('plat'));
-        $('#p_status').text($(this).data('status'));
-        $('#p_masuk').text($(this).data('masuk'));
-
-        if ($(this).data('status') === 'keluar') {
-            $('#keluarArea').show();
-            $('#p_keluar').text($(this).data('keluar'));
-            $('#p_total').text($(this).data('total'));
-        } else {
-            $('#keluarArea').hide();
-        }
-    });
-
-    // 4. Tutup modal
-    $('.close').on('click', function(){
-        $('#modalPreview').fadeOut();
-    });
-
-});
+  positionClockNumbers();
+  updateClock();
+  setInterval(updateClock, 1000);
 </script>
+
 
 </body>
 </html>

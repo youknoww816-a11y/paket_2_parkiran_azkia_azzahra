@@ -140,24 +140,22 @@ $data_kendaraan = $conn->query("
         </header>
 
             <!-- TOOLBAR -->
-    <div class="toolbar-layanan">
-        <button id="btnTambah"><i class="fa-solid fa-plus"></i></button>
-
-        <div class="filter-container">
-            <button id="btnFilter"><i class="fa-solid fa-filter"></i></button>
-            <div id="filterMenu" class="filter-menu hidden">
-                <button data-sort="nama_asc">Nama A-Z</button>
-                <button data-sort="nama_desc">Nama Z-A</button>
-                <button data-sort="tanggal_asc">Tanggal Terlama</button>
-                <button data-sort="tanggal_desc">Tanggal Terkini</button>
-            </div>
-        </div>
-
-        <button id="btnRefresh"><i class="fa-solid fa-arrows-rotate"></i></button>
-        <input type="text" id="searchBox" placeholder="Cari...">
-    </div>
-
-<br>        
+             <div class="toolbar-parkir">
+                <button type="button" class="btn-icon" data-bs-toggle="modal" data-bs-target="#modalKendaraan">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+                
+                <div class="search-wrapper">
+                    <select id="searchType">
+                        <option value="jenis">Jenis Kendaraan</option>
+                        <option value="pemilik">Nama Pemilik</option>
+                    </select>
+                    
+                    <input type="text" id="searchBox" placeholder="Cari Kendaraan...">
+                </div>
+             </div>
+            
+            <br>        
 
             <?php if ($message): ?>
                 <div class="message <?= $message_type ?>">
@@ -166,7 +164,6 @@ $data_kendaraan = $conn->query("
                 <?php endif; ?>
 
     <hr>
-        <h3>Daftar Kendaraan</h3>
             <table>
                 <tr>
                     <th>ID</th>
@@ -186,7 +183,14 @@ $data_kendaraan = $conn->query("
                         <td><?= $row['warna'] ?></td>
                         <td><?= $row['pemilik'] ?></td>
                         <td><?= $row['username'] ?></td>
-                        <td><a a class="action-link edit-link" href="?action=edit&id=<?= $row['id_kendaraan'] ?>">Edit</a>
+                        <td><button type="button"class="btn btn-sm btn-warning btnEdit"
+                        data-id="<?= $row['id_kendaraan'] ?>"
+                        data-plat="<?= $row['plat_nomor'] ?>"
+                        data-jenis="<?= $row['jenis_kendaraan'] ?>"
+                        data-warna="<?= $row['warna'] ?>"
+                        data-pemilik="<?= $row['pemilik'] ?>"
+                        data-user="<?= $row['id_user'] ?>">
+                        Edit</button>
                         <a class="action-link delete-link" href="?action=delete&id=<?= $row['id_kendaraan'] ?>" onclick="return confirm('Hapus kendaraan?')">Hapus</a></td>
                     </tr>
                 <?php endwhile; ?>
@@ -194,163 +198,177 @@ $data_kendaraan = $conn->query("
         </div>
     </main>
 
-    
-        <!-- MODAL FORM -->
-<div id="modalForm" class="modal hidden">
-    <div class="modal-content">
-        <h3 id="modalTitle">Tambah Kendaraan</h3>
+    <!-- MODAL TAMBAH KENDARAAN -->
+<div class="modal fade" id="modalKendaraan" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
 
-        <form method="POST">
-            <input type="hidden" name="form_action" id="form_action" value="<?= $form_action ?>">
-            <input type="hidden" name="id_kendaraan" id="id_kendaraan" value="<?= $id_kendaraan ?>">
-            <input type="hidden" name="pemilik" id="pemilik">
+            <form method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah Kendaraan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
 
-            <div class="form-group">
-                <label>Plat Nomor</label>
-                <input type="text" name="plat_nomor" id="plat_nomor" required>
-            </div>
+                <div class="modal-body">
 
-            <div class="form-group">
-                <label>Jenis Kendaraan</label>
-                <input type="text" name="jenis_kendaraan" id="jenis_kendaraan" required>
-            </div>
+                    <input type="hidden" name="form_action" id="form_action" value="add">
+                    <input type="hidden" name="id_kendaraan" id="id_kendaraan">
+                    <input type="hidden" name="pemilik" id="pemilik">
 
-            <div class="form-group">
-                <label>Warna</label>
-                <input type="text" name="warna" id="warna" required>
-            </div>
+                    <div class="mb-3">
+                        <label class="form-label">Plat Nomor</label>
+                        <input type="text" name="plat_nomor" class="form-control" required>
+                    </div>
 
-            <div class="form-group">
-                <label>Nama Pemilik</label>
-                <input type="text" id="pemilik_view" readonly>
-            </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jenis Kendaraan</label>
+                        <input type="text" name="jenis_kendaraan" class="form-control" required>
+                    </div>
 
-            <div class="form-group">
-                <label>User</label>
-                <select name="id_user" id="userSelect" required>
-                    <option value="">-- Pilih User --</option>
-                    <?php foreach ($user_list as $u): ?>
-                        <option value="<?= $u['id_user'] ?>"
-                                data-nama="<?= $u['nama_lengkap'] ?>">
-                            <?= $u['id_user'] ?> - <?= $u['username'] ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+                    <div class="mb-3">
+                        <label class="form-label">Warna</label>
+                        <input type="text" name="warna" class="form-control" required>
+                    </div>
 
-            <div class="modal-actions">
-                <button type="submit" id="btnSubmit">Tambah</button>
-                <button type="button" id="btnClose">Batal</button>
-            </div>
-        </form>
+                    <div class="mb-3">
+                        <label class="form-label">Nama Pemilik</label>
+                        <input type="text" id="pemilik_view" class="form-control" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">User</label>
+                        <select name="id_user" id="userSelect" class="form-select" required>
+                            <option value="">-- Pilih User --</option>
+                            <?php foreach ($user_list as $u): ?>
+                                <option value="<?= $u['id_user'] ?>"
+                                        data-nama="<?= $u['nama_lengkap'] ?>">
+                                    <?= $u['id_user'] ?> - <?= $u['username'] ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Batal
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Simpan
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
     </div>
 </div>
-    
-    <script>
-    const userSelect = document.getElementById('userSelect');
-    const pemilikInput = document.getElementById('pemilik');
-    const pemilikView = document.getElementById('pemilik_view');
-    
-    userSelect.addEventListener('change', function () {
-        const selected = this.options[this.selectedIndex];
-        const nama = selected.dataset.nama || '';
-        pemilikInput.value = nama;
-        pemilikView.value = nama;
-        });
-    </script>
-    
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const userSelect = document.getElementById('userSelect');
-        const pemilikInput = document.getElementById('pemilik');
-        const pemilikView = document.getElementById('pemilik_view');
 
-    // kalau edit & belum ada pemilik → isi otomatis
-    if (userSelect.value && pemilikInput.value === '') {
-        const selected = userSelect.options[userSelect.selectedIndex];
-        const nama = selected.dataset.nama || '';
-        pemilikInput.value = nama;
-        pemilikView.value = nama;
-    }
-    
-    userSelect.addEventListener('change', function () {
-        const selected = this.options[this.selectedIndex];
-        const nama = selected.dataset.nama || '';
-        pemilikInput.value = nama;
-        pemilikView.value = nama;
-        });
-    });
-    </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-const modal = document.getElementById('modalForm');
-const btnTambah = document.getElementById('btnTambah');
-const btnClose = document.getElementById('btnClose');
-
-const formAction = document.getElementById('form_action');
-const idKendaraan = document.getElementById('id_kendaraan');
-
-const plat = document.getElementById('plat_nomor');
-const jenis = document.getElementById('jenis_kendaraan');
-const warna = document.getElementById('warna');
-const pemilik = document.getElementById('pemilik');
-const pemilikView = document.getElementById('pemilik_view');
-const userSelect = document.getElementById('userSelect');
-
-const modalTitle = document.getElementById('modalTitle');
-const btnSubmit = document.getElementById('btnSubmit');
-
-/* ================= TOMBOL TAMBAH ================= */
-btnTambah.addEventListener('click', () => {
-    modal.classList.remove('hidden');
-
-    formAction.value = 'add';
-    idKendaraan.value = '';
-
-    plat.value = '';
-    jenis.value = '';
-    warna.value = '';
-    pemilik.value = '';
-    pemilikView.value = '';
-    userSelect.value = '';
-
-    modalTitle.innerText = 'Tambah Kendaraan';
-    btnSubmit.innerText = 'Tambah';
-});
-
-/* ================= TOMBOL EDIT ================= */
-document.querySelectorAll('.edit-link').forEach(btn => {
-    btn.addEventListener('click', function (e) {
-        e.preventDefault();
-
-        const row = this.closest('tr');
-
-        modal.classList.remove('hidden');
-
-        formAction.value = 'edit';
-        idKendaraan.value = row.children[0].innerText;
-        plat.value = row.children[1].innerText;
-        jenis.value = row.children[2].innerText;
-        warna.value = row.children[3].innerText;
-        pemilikView.value = row.children[4].innerText;
-
-        modalTitle.innerText = 'Edit Kendaraan';
-        btnSubmit.innerText = 'Update';
-    });
-});
-
-/* ================= CLOSE ================= */
-btnClose.addEventListener('click', () => {
-    modal.classList.add('hidden');
-});
-
-/* ================= AUTO PEMILIK ================= */
-userSelect.addEventListener('change', function () {
+<!-- Untuk mengisi nama otomatis dari username -->
+<script>
+document.getElementById('userSelect').addEventListener('change', function () {
     const nama = this.options[this.selectedIndex].dataset.nama || '';
-    pemilik.value = nama;
-    pemilikView.value = nama;
+    document.getElementById('pemilik').value = nama;
+    document.getElementById('pemilik_view').value = nama;
 });
 </script>
-    
+
+<!-- Modal Form Edit -->
+<script>
+document.querySelectorAll('.btnEdit').forEach(btn => {
+    btn.addEventListener('click', function () {
+
+        // Ambil data dari tombol
+        const id      = this.dataset.id;
+        const plat    = this.dataset.plat;
+        const jenis   = this.dataset.jenis;
+        const warna   = this.dataset.warna;
+        const pemilik = this.dataset.pemilik;
+        const userId  = this.dataset.user;
+
+        // Set ke form
+        document.getElementById('form_action').value = 'edit';
+        document.getElementById('id_kendaraan').value = id;
+        document.querySelector('[name="plat_nomor"]').value = plat;
+        document.querySelector('[name="jenis_kendaraan"]').value = jenis;
+        document.querySelector('[name="warna"]').value = warna;
+        document.getElementById('pemilik_view').value = pemilik;
+        document.getElementById('pemilik').value = pemilik;
+        document.getElementById('userSelect').value = userId;
+
+        // Ubah judul modal
+        document.querySelector('.modal-title').innerText = 'Edit Kendaraan';
+
+        // Buka modal
+        const modal = new bootstrap.Modal(document.getElementById('modalKendaraan'));
+        modal.show();
+    });
+});
+</script>
+
+<!-- Dropdown Search -->
+<script>
+document.getElementById('searchBox').addEventListener('keyup', function () {
+    const keyword = this.value.toLowerCase();
+    const type = document.getElementById('searchType').value;
+    const rows = document.querySelectorAll("table tr");
+
+    rows.forEach((row, index) => {
+        if (index === 0) return; // skip header
+
+        let cellText = "";
+
+        if (type === "jenis") {
+            cellText = row.cells[2].innerText.toLowerCase(); // kolom jenis
+        } else if (type === "pemilik") {
+            cellText = row.cells[4].innerText.toLowerCase(); // kolom pemilik
+        }
+
+        row.style.display = cellText.includes(keyword) ? "" : "none";
+    });
+});
+</script>    
+
+
+<!-- -->
+<script>
+const searchType = document.getElementById('searchType');
+const searchBox = document.getElementById('searchBox');
+
+searchType.addEventListener('change', function () {
+    if (this.value === "") {
+        searchBox.disabled = true;
+        searchBox.value = "";
+        searchBox.placeholder = "Pilih filter dulu...";
+    } else {
+        searchBox.disabled = false;
+        searchBox.placeholder = "Cari " + this.options[this.selectedIndex].text + "...";
+        searchBox.focus();
+    }
+});
+
+searchBox.addEventListener('keyup', function () {
+    const keyword = this.value.toLowerCase();
+    const type = searchType.value;
+    const rows = document.querySelectorAll("table tr");
+
+    rows.forEach((row, index) => {
+        if (index === 0) return;
+
+        let text = "";
+        if (type === "jenis") {
+            text = row.cells[2].innerText.toLowerCase();
+        } else if (type === "pemilik") {
+            text = row.cells[4].innerText.toLowerCase();
+        }
+
+        row.style.display = text.includes(keyword) ? "" : "none";
+    });
+});
+</script>
+
 </body>
 </html>

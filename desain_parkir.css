@@ -431,34 +431,30 @@ body {
 }
 
 
-/* ===== Toolbar Khusus Layanan ===== */
-.toolbar-layanan {
+/* ===== Toolbar ===== */
+
+.toolbar-parkir {
     display: flex;
     align-items: center;
-    gap: .5rem;
-    margin-bottom: 1rem;
+    gap: 10px;
+    width: 100%;
 }
 
-/* Tombol hanya icon */
-.toolbar-layanan button {
-    background: none;           /* hilangin kotak */
-    border: none;               /* hilangin border */
-    padding: 6px;               /* padding kecil biar icon rata */
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;           /* ukuran icon */
-    color: #333;                 /* warna default icon */
-    transition: color 0.3s, transform 0.2s;
+.toolbar-parkir button {
+    background: none !important;
+    color: #0f0f0f !important;
+    padding: 6px !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
-.toolbar-layanan button:hover {
-    color: #007bff;              /* ganti warna icon pas hover */
-    transform: scale(1.1);       /* animasi membesar sedikit */
+.toolbar-parkir button:hover {
+    background: none !important;
+    color: #a09f9f65 !important;
+    transform: scale(1.1);
 }
 
-.toolbar-layanan button:disabled {
+.toolbar-parkir button:disabled {
     color: #ccc;
     cursor: not-allowed;
 }
@@ -544,13 +540,24 @@ button[data-tooltip]:hover::before {
 }
 
 /* Textbox Pencarian di Toolbar */
-.toolbar-layanan input[type="text"] {
+
+.search-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
     flex: 1;
+}
+
+.search-wrapper select {
+    width: 180px;
+}
+
+.search-wrapper input {
+    flex: 1;
+    width: 100%;
     padding: 6px 10px;
-    border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 0.9rem;
-    min-width: 200px;
+    border: 1px solid #ccc;
 }
 
 /* =========================

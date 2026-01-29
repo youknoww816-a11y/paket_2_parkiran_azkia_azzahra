@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 26 Jan 2026 pada 03.55
+-- Waktu pembuatan: 29 Jan 2026 pada 03.23
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -24,6 +24,27 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Struktur dari tabel `tb_area_backup`
+--
+
+CREATE TABLE `tb_area_backup` (
+  `id_area` int(11) NOT NULL,
+  `nama_area` varchar(50) NOT NULL,
+  `kapasitas` int(5) NOT NULL,
+  `terisi` int(5) NOT NULL,
+  `status_area_parkir` enum('penuh','tempat kosong masih tersedia','ditutup') NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `tb_area_backup`
+--
+
+INSERT INTO `tb_area_backup` (`id_area`, `nama_area`, `kapasitas`, `terisi`, `status_area_parkir`) VALUES
+(0, '1MB', 25, 0, 'tempat kosong masih tersedia');
+
+-- --------------------------------------------------------
+
+--
 -- Struktur dari tabel `tb_area_parkir`
 --
 
@@ -40,8 +61,12 @@ CREATE TABLE `tb_area_parkir` (
 --
 
 INSERT INTO `tb_area_parkir` (`id_area`, `nama_area`, `kapasitas`, `terisi`, `status_area_parkir`) VALUES
-(0, '1MB', 10, 0, 'tempat kosong masih tersedia'),
-(1, '1MA', 26, 1, 'tempat kosong masih tersedia');
+(6, '1MB', 20, 0, 'ditutup'),
+(7, '2MB', 45, 0, 'ditutup'),
+(8, '1CA', 10, 0, 'tempat kosong masih tersedia'),
+(17, '1MA', 50, 0, 'tempat kosong masih tersedia'),
+(19, '2CB', 15, 0, 'tempat kosong masih tersedia'),
+(24, '1MC', 15, 0, 'tempat kosong masih tersedia');
 
 -- --------------------------------------------------------
 
@@ -63,9 +88,10 @@ CREATE TABLE `tb_kendaraan` (
 --
 
 INSERT INTO `tb_kendaraan` (`id_kendaraan`, `plat_nomor`, `jenis_kendaraan`, `warna`, `pemilik`, `id_user`) VALUES
-(1, 'B 6716 VRZ', 'Motor Yamaha', 'Merah Tua', 'TEST', 3),
-(2, 'B 6816 VRZ', 'Motor Honda', 'Hitam', 'UDIN', 2),
-(3, 'B 6716 ARC', 'Motor Yamaha', 'Putih', 'SA\'ID', 4);
+(3, 'B 6716 ARC', 'Motor Yamaha', 'Putih', 'SA\'ID', 4),
+(4, 'D 1010 TSK', 'Motor Yamaha', 'Magenta', 'TEST', 3),
+(5, 'B 6816 VRZ', 'Mobil Toyota', 'Hitam', 'ANOMALI', 6),
+(6, 'B 6716 VRZ', 'Motor Honda', 'Merah', 'UDIN', 2);
 
 -- --------------------------------------------------------
 
@@ -131,10 +157,10 @@ CREATE TABLE `tb_user` (
 --
 
 INSERT INTO `tb_user` (`id_user`, `nama_lengkap`, `username`, `password`, `role`, `status_aktif`) VALUES
-(2, 'UDIN', 'saha_maneh', '$2y$10$gPfQzGcu.3sY1qMkOK0I9eJmogH/Mq5ihlUKXt9eftX3AbnplN2/y', 'admin', 1),
+(2, 'UDIN', 'saha_maneh', '$2y$10$gPfQzGcu.3sY1qMkOK0I9eJmogH/Mq5ihlUKXt9eftX3AbnplN2/y', 'owner', 1),
 (3, 'TEST', 'test123', '$2y$10$VaDO5nHDwYQ500e0XtGp5eE1v6zXEG6yBT2VcIBAfG.sOIYmER04i', 'admin', 1),
-(4, 'SA\'ID', 'bisa_diandalkan', '$2y$10$b5U1Ql0WgaJc4ukwoFX/BOAG5orQf1W7R6r/Jq6b3POsSjz11ZB1G', 'admin', 1),
-(5, 'V.S', 'finalstaige2045', '$2y$10$BJrmhFJMsGi1x/m2A/peRO3gVsR5eROOI/tBOplyZKPjTk6U0KMYu', 'owner', 1);
+(4, 'SA\'ID', 'bisa_diandalkan', '$2y$10$b5U1Ql0WgaJc4ukwoFX/BOAG5orQf1W7R6r/Jq6b3POsSjz11ZB1G', 'petugas', 1),
+(6, 'ANOMALI', 'decade010', '$2y$10$rum.kCW3FyslvammfQ1bVuMxb.ovobxAzxYbVkxllwqxCtN8hdw/G', 'admin', 1);
 
 --
 -- Indexes for dumped tables
@@ -172,9 +198,9 @@ ALTER TABLE `tb_tarif`
 ALTER TABLE `tb_transaksi`
   ADD PRIMARY KEY (`id_parkir`),
   ADD KEY `fk_transaksi_kendaraan` (`id_kendaraan`),
-  ADD KEY `fk_transaksi_area` (`id_area`),
   ADD KEY `fk_transaksi_tarif` (`id_tarif`),
-  ADD KEY `fk_transaksi_user` (`id_user`);
+  ADD KEY `fk_transaksi_user` (`id_user`),
+  ADD KEY `fk_transaksi_area` (`id_area`);
 
 --
 -- Indeks untuk tabel `tb_user`
@@ -187,16 +213,22 @@ ALTER TABLE `tb_user`
 --
 
 --
+-- AUTO_INCREMENT untuk tabel `tb_area_parkir`
+--
+ALTER TABLE `tb_area_parkir`
+  MODIFY `id_area` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+
+--
 -- AUTO_INCREMENT untuk tabel `tb_kendaraan`
 --
 ALTER TABLE `tb_kendaraan`
-  MODIFY `id_kendaraan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_kendaraan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_user`
 --
 ALTER TABLE `tb_user`
-  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
@@ -218,7 +250,7 @@ ALTER TABLE `tb_log_aktivitas`
 -- Ketidakleluasaan untuk tabel `tb_transaksi`
 --
 ALTER TABLE `tb_transaksi`
-  ADD CONSTRAINT `fk_transaksi_area` FOREIGN KEY (`id_area`) REFERENCES `tb_area_parkir` (`id_area`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_transaksi_area` FOREIGN KEY (`id_area`) REFERENCES `tb_area_parkir` (`id_area`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_transaksi_kendaraan` FOREIGN KEY (`id_kendaraan`) REFERENCES `tb_kendaraan` (`id_kendaraan`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_transaksi_tarif` FOREIGN KEY (`id_tarif`) REFERENCES `tb_tarif` (`id_tarif`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_transaksi_user` FOREIGN KEY (`id_user`) REFERENCES `tb_user` (`id_user`) ON UPDATE CASCADE;

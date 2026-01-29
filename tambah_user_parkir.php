@@ -158,22 +158,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="button" onclick="window.location.href='tambah_user_parkir.php'" style="background-color: #6c757d;">Batal Edit</button>
         <?php endif; ?>
     </form>
+        
 
-<hr>
+     <hr>
+     <h3>Daftar User</h3>
+     <div class="toolbar-parkir">
+        <div class="search-wrapper">
+            <select id="searchType">
+                <option value="username">Username</option>
+                <option value="pemilik">Nama</option>
+            </select>        
+            
+            <input type="text" id="searchBox" placeholder="Cari...">
+        </div>
+    </div>
 
-<!-- TABLE -->
- <h3>Daftar User</h3>
- <table>
-    <thead>
-        <tr>
-            <th>No</th>
-            <th>Nama</th>
-            <th>Username</th>
-            <th>Role</th>
-            <th>Aksi</th>
-        </tr>
-    </thead>
-    <tbody>
+    <!-- TABLE -->
+     <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
         
         <?php
         $no = 1;
@@ -226,6 +237,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             history.replaceState({}, document.title, window.location.pathname);
         }
     });
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchBox = document.getElementById("searchBox");
+    const searchType = document.getElementById("searchType");
+    const tableRows = document.querySelectorAll("table tbody tr");
+
+    searchBox.addEventListener("keyup", function () {
+        const keyword = searchBox.value.toLowerCase();
+        const type = searchType.value;
+
+        tableRows.forEach(row => {
+            let text = "";
+
+            if (type === "username") {
+                // Username (kolom ke-3)
+                text = row.cells[2].innerText.toLowerCase();
+            } else if (type === "pemilik") {
+                // Nama Lengkap (kolom ke-2)
+                text = row.cells[1].innerText.toLowerCase();
+            }
+
+            row.style.display = text.includes(keyword) ? "" : "none";
+        });
+    });
+});
 </script>
 
 
