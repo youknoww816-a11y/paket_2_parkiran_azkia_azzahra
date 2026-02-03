@@ -3,6 +3,7 @@ session_start();
 include 'koneksi_parkir.php';
 
 $active_page = 'area_parkir';
+
 $message = '';
 $message_type = '';
 
@@ -136,17 +137,19 @@ if (isset($_GET['msg'])) {
         <link rel="stylesheet" href="desain_parkir.css">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     </head>
     <body>
         <div class="wrapper">
-            <main class="main-content">
+            
+        <?php include 'sidebar_parkiran.php'; ?>
+
+        <main class="main-content">
                 
     <!-- HEADER -->
-     <header class="main-header">
-        <h2>Manajemen Area Parkir</h2>
-    </header>
+     <header class="main-header"><h2>Manajemen Area Parkir</h2></header>
 
     <!-- MESSAGE -->
      <?php if ($message): ?>

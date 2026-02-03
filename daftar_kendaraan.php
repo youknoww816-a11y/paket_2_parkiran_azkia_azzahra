@@ -149,6 +149,7 @@ $data_kendaraan = $conn->query("
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link rel="stylesheet" href="desain_parkir.css">
     </head>
 
@@ -157,9 +158,9 @@ $data_kendaraan = $conn->query("
     <main class="main-content">
         <div class="message-area"></div>
         
-        <header class="main-header">
-            <h2>Manajemen Kendaraan</h2>
-        </header>
+        <header class="main-header"><h2>Manajemen Kendaraan</h2></header>
+
+            <?php include 'sidebar_parkiran.php'; ?>
 
             <!-- TOOLBAR -->
              <div class="toolbar-parkir">
@@ -251,7 +252,7 @@ $data_kendaraan = $conn->query("
                             <option value="">-- Pilih Tipe --</option>
                             <option value="motor">Motor</option>
                             <option value="mobil">Mobil</option>
-                            <option value="lain">Kendaraan Lain</option>
+                            <option value="lainnya">Kendaraan Lain</option>
                         </select>
                     </div>
 

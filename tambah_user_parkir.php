@@ -1,6 +1,8 @@
 <?php
 include 'koneksi_parkir.php';
 
+$active_page = 'tambah_user_parkir.php';
+
 $message = '';
 $type = '';
 
@@ -108,21 +110,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.2/css/all.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-pO2e7RkXWQmkWs8qovE+8tSv8VXYkI5Gnvq02+6TZ5pPhsmjtz4MzG3DLN0+Nyz6GLAxVZ4/j+gZ9Mw+BW4fNQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="desain_parkir.css">
     </head>
 
 <body>
-<div class="wrapper">
-
-<main class="main-content">
-
-<header class="main-header">
-    <h2>Tambah User Parkir</h2>
-</header>
-
-    <main class="main-content">
-    <div class="message-area"></div>
-    <form method="POST" action="tambah_user_parkir.php">
+    <div class="wrapper">
+        <?php include 'sidebar_parkiran.php'; ?>
+        
+        <main class="main-content">
+            
+        <header class="main-header"><h2>Tambah User Parkir</h2></header>
+        
+        <main class="main-content">
+            <div class="message-area"></div>
+            <form method="POST" action="tambah_user_parkir.php">
 
 <!-- FORM -->
 <form method="POST">

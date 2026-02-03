@@ -1,7 +1,7 @@
 <?php
 include 'koneksi_parkir.php';
 // include 'proteksi_user_parkir.php'; // nanti bareng login
-$active_page = 'dashboard_parkir';
+$active_page = 'dashboard_parkiran';
 
 date_default_timezone_set('Asia/Jakarta');
 $tanggal_hari_ini = date('Y-m-d');
@@ -131,16 +131,17 @@ $chart_data_json = json_encode($data_chart);
 
     <link rel="stylesheet" href="desain_parkir.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 <div class="wrapper">
+    <?php include 'sidebar_parkiran.php'; ?>
 
 <main class="main-content">
-<header class="main-header">
-    <h2>Dashboard Parkir</h2>
-</header>
+    <header class="main-header"><h2>Dashboard Parkir</h2></header>
 
 <section class="summary-section">
 <h3>Data Hari Ini (<?= htmlspecialchars($tanggal_hari_ini) ?>)</h3>

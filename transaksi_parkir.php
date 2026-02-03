@@ -4,6 +4,7 @@ date_default_timezone_set('Asia/Jakarta');
 include 'koneksi_parkir.php';
 
 $active_page = 'transaksi_parkir';
+
 $message = '';
 $message_type = '';
 
@@ -47,7 +48,7 @@ if ($username !== '') {
         $tipe         = strtolower($kendaraan['tipe_kendaraan']);
 
         /* ===============================
-           CEK TRANSAKSI TERAKHIR
+           CEK TRANSAKSI TERAKHIR (STATE)
            =============================== */
         $cek = $conn->query("
             SELECT *
@@ -63,8 +64,8 @@ if ($username !== '') {
         /* =================== MASUK PARKIR =================== */
         if ($aksi === 'masuk') {
 
-            if ($status_terakhir === 'masuk') {
-                $message = "Kendaraan masih berada di area parkir.";
+            if ($status_terakhir === 'parkir') {
+                $message = "Kendaraan masih terparkir dan belum keluar.";
                 $message_type = "error";
             } else {
 
@@ -97,18 +98,20 @@ if ($username !== '') {
                         ) VALUES (
                             $id_kendaraan,
                             '$now',
-                            'masuk',
+                            'parkir',
                             $id_user,
                             $id_area
                         )
                     ");
 
-                    // Tambah isi area
                     $conn->query("
                         UPDATE tb_area_parkir 
                         SET terisi = terisi + 1
                         WHERE id_area = $id_area
                     ");
+
+                    $message = "Kendaraan berhasil masuk parkir.";
+                    $message_type = "success";
 
                     $data_tiket = [
                         'mode' => 'MASUK',
@@ -120,65 +123,72 @@ if ($username !== '') {
         }
 
         /* =================== KELUAR PARKIR =================== */
-        elseif ($aksi === 'keluar' && $status_terakhir === 'masuk') {
+        elseif ($aksi === 'keluar') {
 
-            $masuk  = strtotime($parkir['waktu_masuk']);
-            $keluar = time();
+            if ($status_terakhir !== 'parkir') {
+                $message = "Kendaraan tidak sedang terparkir.";
+                $message_type = "error";
+            } else {
 
-            $durasi = ceil(($keluar - $masuk) / 3600);
-            if ($durasi < 1) $durasi = 1;
+                $masuk  = strtotime($parkir['waktu_masuk']);
+                $keluar = time();
 
-            $total = 0;
-            $id_tarif = 0;
+                $durasi = ceil(($keluar - $masuk) / 3600);
+                if ($durasi < 1) $durasi = 1;
 
-            if ($tipe === 'motor') {
-                $id_tarif = 1;
-                if ($durasi <= 1) $total = 2000;
-                elseif ($durasi < 24) $total = 2000 + (($durasi - 1) * 2000);
-                elseif ($durasi == 24) $total = 15000;
-                else $total = 15000 + (($durasi - 24) * 2000);
+                $total = 0;
+                $id_tarif = 0;
+
+                if ($tipe === 'motor') {
+                    $id_tarif = 1;
+                    if ($durasi <= 1) $total = 2000;
+                    elseif ($durasi < 24) $total = 2000 + (($durasi - 1) * 2000);
+                    elseif ($durasi == 24) $total = 15000;
+                    else $total = 15000 + (($durasi - 24) * 2000);
+                }
+                elseif ($tipe === 'mobil') {
+                    $id_tarif = 2;
+                    if ($durasi <= 1) $total = 5000;
+                    elseif ($durasi < 24) $total = 5000 + (($durasi - 1) * 3000);
+                    else $total = 20000;
+                }
+                else {
+                    $id_tarif = 3;
+                    if ($durasi <= 1) $total = 6000;
+                    elseif ($durasi < 24) $total = 6000 + (($durasi - 1) * 5000);
+                    else $total = 35000;
+                }
+
+                $now = date('Y-m-d H:i:s');
+
+                $conn->query("
+                    UPDATE tb_transaksi SET
+                        waktu_keluar = '$now',
+                        durasi_jam = $durasi,
+                        biaya_total = $total,
+                        id_tarif = $id_tarif,
+                        status = 'selesai'
+                    WHERE id_parkir = {$parkir['id_parkir']}
+                ");
+
+                $conn->query("
+                    UPDATE tb_area_parkir 
+                    SET terisi = IF(terisi > 0, terisi - 1, 0)
+                    WHERE id_area = {$parkir['id_area']}
+                ");
+
+                $message = "Kendaraan berhasil keluar parkir.";
+                $message_type = "success";
+
+                $data_tiket = [
+                    'mode' => 'KELUAR',
+                    'waktu_masuk' => $parkir['waktu_masuk'],
+                    'waktu_keluar' => $now,
+                    'durasi' => $durasi,
+                    'total' => $total,
+                    'kendaraan' => $kendaraan
+                ];
             }
-            elseif ($tipe === 'mobil') {
-                $id_tarif = 2;
-                if ($durasi <= 1) $total = 5000;
-                elseif ($durasi < 24) $total = 5000 + (($durasi - 1) * 3000);
-                else $total = 20000;
-            }
-            else {
-                $id_tarif = 3;
-                if ($durasi <= 1) $total = 6000;
-                elseif ($durasi < 24) $total = 6000 + (($durasi - 1) * 5000);
-                else $total = 35000;
-            }
-
-            $now = date('Y-m-d H:i:s');
-
-            $conn->query("
-                UPDATE tb_transaksi SET
-                    waktu_keluar = '$now',
-                    durasi_jam = $durasi,
-                    biaya_total = $total,
-                    id_tarif = $id_tarif,
-                    status = 'keluar'
-                WHERE id_parkir = {$parkir['id_parkir']}
-                AND status = 'masuk'
-            ");
-
-            // Kurangi isi area
-            $conn->query("
-                UPDATE tb_area_parkir 
-                SET terisi = IF(terisi > 0, terisi - 1, 0)
-                WHERE id_area = {$parkir['id_area']}
-            ");
-
-            $data_tiket = [
-                'mode' => 'KELUAR',
-                'waktu_masuk' => $parkir['waktu_masuk'],
-                'waktu_keluar' => $now,
-                'durasi' => $durasi,
-                'total' => $total,
-                'kendaraan' => $kendaraan
-            ];
         }
     }
 }
@@ -195,11 +205,15 @@ if ($username !== '') {
     <link rel="stylesheet" href="desain_parkir.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
 </head>
 
 <body>    
     <div class="wrapper">
+        <?php include 'sidebar_parkiran.php'; ?>
+        
         <main class="main-content">
             
         <!-- HEADER -->
