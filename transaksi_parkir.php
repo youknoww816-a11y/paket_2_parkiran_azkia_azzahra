@@ -64,9 +64,11 @@ if ($username !== '') {
         /* =================== MASUK PARKIR =================== */
         if ($aksi === 'masuk') {
 
-            if ($status_terakhir === 'parkir') {
+            // JIKA STATUS TERAKHIR MASIH 'MASUK', TOLAK
+            if ($status_terakhir === 'masuk') {
                 $message = "Kendaraan masih terparkir dan belum keluar.";
                 $message_type = "error";
+
             } else {
 
                 $qArea = $conn->query("
@@ -88,6 +90,7 @@ if ($username !== '') {
                     $id_area = $area['id_area'];
                     $now = date('Y-m-d H:i:s');
 
+                    // STATUS DISAMAKAN DENGAN DATABASE
                     $conn->query("
                         INSERT INTO tb_transaksi (
                             id_kendaraan,
@@ -98,7 +101,7 @@ if ($username !== '') {
                         ) VALUES (
                             $id_kendaraan,
                             '$now',
-                            'parkir',
+                            'masuk',
                             $id_user,
                             $id_area
                         )
@@ -116,7 +119,8 @@ if ($username !== '') {
                     $data_tiket = [
                         'mode' => 'MASUK',
                         'waktu_masuk' => $now,
-                        'kendaraan' => $kendaraan
+                        'kendaraan' => $kendaraan,
+                        'area' => $detail_area
                     ];
                 }
             }
@@ -125,7 +129,8 @@ if ($username !== '') {
         /* =================== KELUAR PARKIR =================== */
         elseif ($aksi === 'keluar') {
 
-            if ($status_terakhir !== 'parkir') {
+            // JIKA STATUS TERAKHIR BUKAN 'MASUK', TOLAK
+            if ($status_terakhir !== 'masuk') {
                 $message = "Kendaraan tidak sedang terparkir.";
                 $message_type = "error";
             } else {
@@ -161,13 +166,14 @@ if ($username !== '') {
 
                 $now = date('Y-m-d H:i:s');
 
+                // STATUS DISAMAKAN DENGAN DATABASE
                 $conn->query("
                     UPDATE tb_transaksi SET
                         waktu_keluar = '$now',
                         durasi_jam = $durasi,
                         biaya_total = $total,
                         id_tarif = $id_tarif,
-                        status = 'selesai'
+                        status = 'keluar'
                     WHERE id_parkir = {$parkir['id_parkir']}
                 ");
 
@@ -180,13 +186,20 @@ if ($username !== '') {
                 $message = "Kendaraan berhasil keluar parkir.";
                 $message_type = "success";
 
+                $qDetailArea = $conn->query("
+                SELECT nama_area
+                FROM tb_area_parkir
+                WHERE id_area = {$parkir['id_area']}");
+                $detail_area = $qDetailArea->fetch_assoc();
+
                 $data_tiket = [
                     'mode' => 'KELUAR',
                     'waktu_masuk' => $parkir['waktu_masuk'],
                     'waktu_keluar' => $now,
                     'durasi' => $durasi,
                     'total' => $total,
-                    'kendaraan' => $kendaraan
+                    'kendaraan' => $kendaraan,
+                    'area' => $detail_area
                 ];
             }
         }
@@ -275,6 +288,7 @@ if ($username !== '') {
     <?php if (!empty($data_tiket)): ?>
         <div class="hasil-transaksi">
             <h3>Detail Transaksi</h3>
+            <p><strong>Area Parkir:</strong> <?= $data_tiket['area']['nama_area'] ?? '-' ?></p>
             <p><strong>Nama:</strong> <?= $data_tiket['kendaraan']['nama_lengkap'] ?? '-' ?></p>
             <p><strong>Plat Nomor:</strong> <?= $data_tiket['kendaraan']['plat_nomor'] ?? '-' ?></p>
             <p><strong>Jenis Kendaraan:</strong> <?= ucfirst($data_tiket['kendaraan']['jenis_kendaraan'] ?? '-') ?></p>
@@ -350,3 +364,8 @@ updateDigitalTime();
 
 </body>
 </html>
+
+<!-- Note:
+           Mungkin durasi seberapa lama parkir perlu diperbaiki. . . 
+           Sama mungkin kamu harus input password. . . 
+-->

@@ -61,16 +61,17 @@ if (!function_exists('display_message')) {
 
 
     <ul class="sidebar-nav">
-        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+        <?php //if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                 <li><a href="dashboard_parkiran.php" class="<?= $active_page == 'dashboard_parkiran' ? 'active' : '' ?>"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="tambah_user_parkir.php" class="<?= $active_page == 'tambah_user_parkir' ? 'active' : '' ?>"><i class="fa-solid fa-user-plus"></i> Tambah User</a></li>
                 <li><a href="daftar_kendaraan.php" class="<?= $active_page == 'daftar_kendaraan' ? 'active' : '' ?>"><i class="fa-solid fa-motorcycle"></i> Daftar Kendaraan</a></li>
                 <li><a href="area_parkir.php" class="<?= $active_page == 'area_parkir' ? 'active' : '' ?>"><i class="fa-solid fa-car-tunnel"></i> Area Parkir</a></li>
                 <li><a href="transaksi_parkir.php" class="<?= $active_page == 'transaksi_parkir' ? 'active' : '' ?>"><i class="fa-solid fa-ticket"></i> Tiket Parkir</a></li>
                 <li><a href="log_aktivitas_parkiran.php" class="<?= $active_page == 'log_aktivitas_parkiran' ? 'active' : '' ?>"><i class="fa-regular fa-calendar-days"></i> Log Parkiran</a></li>
                 <li><a href="pengaturan.php" class="<?= $active_page == 'pengaturan' ? 'active' : '' ?>"><i class="fas fa-cog"></i> Pengaturan</a></li>
-        <?php else: ?>
-            <li><a href="catat_absensi.php" class="<?= $active_page == 'catat_absensi' ? 'active' : '' ?>"><i class="fas fa-clock"></i> Catat Absensi</a></li>
-        <?php endif; ?>
+        <?//php else: ?>
+            <!-- <li><a href="catat_absensi.php" class="<//?= $active_page == 'catat_absensi' ? 'active' : '' ?>"><i class="fas fa-clock"></i> Catat Absensi</a></li> -->
+        <?//php endif; ?>
     </ul>
 </div>
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 03 Feb 2026 pada 01.10
+-- Waktu pembuatan: 03 Feb 2026 pada 07.21
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -30,6 +30,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `tb_area_parkir` (
   `id_area` int(11) NOT NULL,
   `nama_area` varchar(50) NOT NULL,
+  `tipe_kendaraan` enum('motor','mobil','lainnya') NOT NULL,
   `kapasitas` int(5) NOT NULL,
   `terisi` int(5) NOT NULL,
   `status_area_parkir` enum('penuh','tempat kosong masih tersedia','ditutup') NOT NULL
@@ -39,13 +40,12 @@ CREATE TABLE `tb_area_parkir` (
 -- Dumping data untuk tabel `tb_area_parkir`
 --
 
-INSERT INTO `tb_area_parkir` (`id_area`, `nama_area`, `kapasitas`, `terisi`, `status_area_parkir`) VALUES
-(6, '1MB', 20, 0, 'ditutup'),
-(7, '2MB', 45, 0, 'ditutup'),
-(8, '1CA', 10, 0, 'tempat kosong masih tersedia'),
-(17, '1MA', 50, 0, 'tempat kosong masih tersedia'),
-(19, '2CB', 15, 0, 'tempat kosong masih tersedia'),
-(24, '1MC', 15, 0, 'tempat kosong masih tersedia');
+INSERT INTO `tb_area_parkir` (`id_area`, `nama_area`, `tipe_kendaraan`, `kapasitas`, `terisi`, `status_area_parkir`) VALUES
+(6, '1MB', 'motor', 20, 0, 'ditutup'),
+(7, '2MB', 'motor', 45, 0, 'ditutup'),
+(17, '1MA', 'motor', 50, 10, 'tempat kosong masih tersedia'),
+(26, '1CA', 'mobil', 17, 0, 'tempat kosong masih tersedia'),
+(27, '1OB', 'lainnya', 10, 1, 'tempat kosong masih tersedia');
 
 -- --------------------------------------------------------
 
@@ -56,7 +56,7 @@ INSERT INTO `tb_area_parkir` (`id_area`, `nama_area`, `kapasitas`, `terisi`, `st
 CREATE TABLE `tb_kendaraan` (
   `id_kendaraan` int(11) NOT NULL,
   `plat_nomor` varchar(15) NOT NULL,
-  `tipe_kendaraan` enum('motor','mobil','lain') NOT NULL,
+  `tipe_kendaraan` enum('motor','mobil','lainnya') NOT NULL,
   `jenis_kendaraan` varchar(20) NOT NULL,
   `warna` varchar(20) NOT NULL,
   `pemilik` varchar(100) NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE `tb_kendaraan` (
 INSERT INTO `tb_kendaraan` (`id_kendaraan`, `plat_nomor`, `tipe_kendaraan`, `jenis_kendaraan`, `warna`, `pemilik`, `id_user`) VALUES
 (4, 'D 1010 TSK', 'motor', 'Motor Yamaha', 'Magenta', 'ANOMALI', 6),
 (6, 'B 6716 VRZ', 'motor', 'Motor Honda', 'Merah', 'SA\'ID', 4),
-(8, 'B 6716 ARC', 'lain', 'Van', 'Putih', 'TEST', 3);
+(9, 'B 6716 ARC', 'lainnya', 'Van', 'Putih', 'UDIN', 2);
 
 -- --------------------------------------------------------
 
@@ -130,17 +130,9 @@ CREATE TABLE `tb_transaksi` (
 --
 
 INSERT INTO `tb_transaksi` (`id_parkir`, `id_kendaraan`, `waktu_masuk`, `waktu_keluar`, `id_tarif`, `durasi_jam`, `biaya_total`, `status`, `id_user`, `id_area`) VALUES
-(1, 4, '2026-01-29 10:12:46', '2026-01-30 07:55:26', 3, 22, 50000, 'keluar', 3, 8),
-(2, 4, '2026-01-30 08:05:22', '2026-01-30 08:05:35', 3, 1, 6000, 'keluar', 3, 8),
-(3, 6, '2026-01-30 08:16:15', '2026-01-30 08:28:33', 3, 1, 6000, 'keluar', 2, 8),
-(4, 6, '2026-01-30 08:30:17', '2026-01-30 08:51:35', 3, 1, 6000, 'keluar', 2, 8),
-(5, 4, '2026-01-30 09:12:44', '0000-00-00 00:00:00', NULL, 0, 0, 'masuk', 3, 8),
-(6, 4, '2026-01-30 09:14:56', '2026-01-30 09:15:12', 3, 1, 6000, 'keluar', 3, 8),
-(7, 6, '2026-02-02 09:15:02', '0000-00-00 00:00:00', NULL, 0, 0, 'masuk', 2, 8),
-(8, 6, '2026-02-02 12:39:01', '0000-00-00 00:00:00', NULL, 0, 0, 'masuk', 2, 8),
-(9, 6, '2026-02-03 07:01:15', '0000-00-00 00:00:00', NULL, 0, 0, 'masuk', 4, 8),
-(10, 6, '2026-02-03 07:01:31', '0000-00-00 00:00:00', NULL, 0, 0, 'masuk', 4, 8),
-(11, 4, '2026-02-03 07:02:43', '0000-00-00 00:00:00', NULL, 0, 0, 'masuk', 6, 8);
+(21, 6, '2026-02-03 10:05:09', '0000-00-00 00:00:00', NULL, 0, 0, '', 4, 17),
+(22, 9, '2026-02-03 10:10:24', '0000-00-00 00:00:00', NULL, 0, 0, '', 2, 27),
+(26, 4, '2026-02-03 13:17:26', '0000-00-00 00:00:00', NULL, 0, 0, '', 6, 17);
 
 -- --------------------------------------------------------
 
@@ -182,7 +174,7 @@ ALTER TABLE `tb_area_parkir`
 --
 ALTER TABLE `tb_kendaraan`
   ADD PRIMARY KEY (`id_kendaraan`),
-  ADD KEY `fk_kendaraan_id_user` (`id_user`);
+  ADD UNIQUE KEY `unique_user_kendaraan` (`id_user`);
 
 --
 -- Indeks untuk tabel `tb_log_aktivitas`
@@ -221,19 +213,19 @@ ALTER TABLE `tb_user`
 -- AUTO_INCREMENT untuk tabel `tb_area_parkir`
 --
 ALTER TABLE `tb_area_parkir`
-  MODIFY `id_area` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id_area` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_kendaraan`
 --
 ALTER TABLE `tb_kendaraan`
-  MODIFY `id_kendaraan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_kendaraan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_transaksi`
 --
 ALTER TABLE `tb_transaksi`
-  MODIFY `id_parkir` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_parkir` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_user`
