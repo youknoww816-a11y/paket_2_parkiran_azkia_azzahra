@@ -11,14 +11,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tambah_area'])) {
 
     $nama = $_POST['nama_area'];
     $kapasitas = $_POST['kapasitas'];
+    $tipe = $_POST['tipe_kendaraan'];
     $status = $_POST['status_area'];
 
     $stmt = $conn->prepare("
-        INSERT INTO tb_area_parkir 
-        (nama_area, kapasitas, terisi, status_area_parkir)
-        VALUES (?, ?, 0, ?)
+    INSERT INTO tb_area_parkir 
+    (nama_area, tipe_kendaraan, kapasitas, terisi, status_area_parkir)
+    VALUES (?, ?, ?, 0, ?)
     ");
-    $stmt->bind_param("sis", $nama, $kapasitas, $status);
+    $stmt->bind_param("ssis", $nama, $tipe, $kapasitas, $status);
 
     if ($stmt->execute()) {
         header("Location: area_parkir.php?msg=tambah_sukses");
@@ -29,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tambah_area'])) {
 }
 
 /* ================== UPDATE STATUS AREA ================== */
+/* Note: Cuma bisa mengubah status dan Kapasitas saja */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_area'])) {
 
     $id_area = $_POST['id_area'];
@@ -222,6 +224,16 @@ if (isset($_GET['msg'])) {
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Tipe Kendaraan</label>
+                        <select name="tipe_kendaraan" class="form-select" required>
+                            <option value="">-- Pilih Tipe --</option>
+                            <option value="motor">Motor</option>
+                            <option value="mobil">Mobil</option>
+                            <option value="lainnya">Kendaraan Lainnya</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label">Kapasitas</label>
                         <input type="number" name="kapasitas" class="form-control" required>
                     </div>
@@ -254,6 +266,7 @@ if (isset($_GET['msg'])) {
                         <tr>
                             <th>ID</th>
                             <th>Nama Area</th>
+                            <th>Khusus Kendaraan</th>
                             <th>Kapasitas</th>
                             <th>Terisi</th>
                             <th>Status</th>
@@ -274,6 +287,7 @@ if (isset($_GET['msg'])) {
                     <tr>
                         <td><?= $row['id_area'] ?></td>
                         <td><?= $row['nama_area'] ?></td>
+                        <td><?= $row['tipe_kendaraan'] ?></td>
                         <td><?= $row['kapasitas'] ?></td>
                         <td><?= $row['terisi'] ?></td>
                         <td><span class="badge bg-<?= $status_badge ?>"><?= $row['status_final'] ?></span></td>    

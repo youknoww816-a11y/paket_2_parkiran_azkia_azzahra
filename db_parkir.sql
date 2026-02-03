@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 29 Jan 2026 pada 03.23
+-- Waktu pembuatan: 03 Feb 2026 pada 01.10
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -20,27 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `db_parkir`
 --
-
--- --------------------------------------------------------
-
---
--- Struktur dari tabel `tb_area_backup`
---
-
-CREATE TABLE `tb_area_backup` (
-  `id_area` int(11) NOT NULL,
-  `nama_area` varchar(50) NOT NULL,
-  `kapasitas` int(5) NOT NULL,
-  `terisi` int(5) NOT NULL,
-  `status_area_parkir` enum('penuh','tempat kosong masih tersedia','ditutup') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data untuk tabel `tb_area_backup`
---
-
-INSERT INTO `tb_area_backup` (`id_area`, `nama_area`, `kapasitas`, `terisi`, `status_area_parkir`) VALUES
-(0, '1MB', 25, 0, 'tempat kosong masih tersedia');
 
 -- --------------------------------------------------------
 
@@ -77,6 +56,7 @@ INSERT INTO `tb_area_parkir` (`id_area`, `nama_area`, `kapasitas`, `terisi`, `st
 CREATE TABLE `tb_kendaraan` (
   `id_kendaraan` int(11) NOT NULL,
   `plat_nomor` varchar(15) NOT NULL,
+  `tipe_kendaraan` enum('motor','mobil','lain') NOT NULL,
   `jenis_kendaraan` varchar(20) NOT NULL,
   `warna` varchar(20) NOT NULL,
   `pemilik` varchar(100) NOT NULL,
@@ -87,11 +67,10 @@ CREATE TABLE `tb_kendaraan` (
 -- Dumping data untuk tabel `tb_kendaraan`
 --
 
-INSERT INTO `tb_kendaraan` (`id_kendaraan`, `plat_nomor`, `jenis_kendaraan`, `warna`, `pemilik`, `id_user`) VALUES
-(3, 'B 6716 ARC', 'Motor Yamaha', 'Putih', 'SA\'ID', 4),
-(4, 'D 1010 TSK', 'Motor Yamaha', 'Magenta', 'TEST', 3),
-(5, 'B 6816 VRZ', 'Mobil Toyota', 'Hitam', 'ANOMALI', 6),
-(6, 'B 6716 VRZ', 'Motor Honda', 'Merah', 'UDIN', 2);
+INSERT INTO `tb_kendaraan` (`id_kendaraan`, `plat_nomor`, `tipe_kendaraan`, `jenis_kendaraan`, `warna`, `pemilik`, `id_user`) VALUES
+(4, 'D 1010 TSK', 'motor', 'Motor Yamaha', 'Magenta', 'ANOMALI', 6),
+(6, 'B 6716 VRZ', 'motor', 'Motor Honda', 'Merah', 'SA\'ID', 4),
+(8, 'B 6716 ARC', 'lain', 'Van', 'Putih', 'TEST', 3);
 
 -- --------------------------------------------------------
 
@@ -118,6 +97,15 @@ CREATE TABLE `tb_tarif` (
   `tarif_per_jam` decimal(10,0) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data untuk tabel `tb_tarif`
+--
+
+INSERT INTO `tb_tarif` (`id_tarif`, `jenis_kendaraan`, `tarif_per_jam`) VALUES
+(1, 'motor', 2000),
+(2, 'mobil', 5000),
+(3, 'lainnya', 6000);
+
 -- --------------------------------------------------------
 
 --
@@ -129,13 +117,30 @@ CREATE TABLE `tb_transaksi` (
   `id_kendaraan` int(11) NOT NULL,
   `waktu_masuk` datetime NOT NULL,
   `waktu_keluar` datetime NOT NULL,
-  `id_tarif` int(11) NOT NULL,
+  `id_tarif` int(11) DEFAULT NULL,
   `durasi_jam` int(5) NOT NULL,
   `biaya_total` decimal(10,0) NOT NULL,
   `status` enum('masuk','keluar') NOT NULL,
   `id_user` int(11) NOT NULL,
   `id_area` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `tb_transaksi`
+--
+
+INSERT INTO `tb_transaksi` (`id_parkir`, `id_kendaraan`, `waktu_masuk`, `waktu_keluar`, `id_tarif`, `durasi_jam`, `biaya_total`, `status`, `id_user`, `id_area`) VALUES
+(1, 4, '2026-01-29 10:12:46', '2026-01-30 07:55:26', 3, 22, 50000, 'keluar', 3, 8),
+(2, 4, '2026-01-30 08:05:22', '2026-01-30 08:05:35', 3, 1, 6000, 'keluar', 3, 8),
+(3, 6, '2026-01-30 08:16:15', '2026-01-30 08:28:33', 3, 1, 6000, 'keluar', 2, 8),
+(4, 6, '2026-01-30 08:30:17', '2026-01-30 08:51:35', 3, 1, 6000, 'keluar', 2, 8),
+(5, 4, '2026-01-30 09:12:44', '0000-00-00 00:00:00', NULL, 0, 0, 'masuk', 3, 8),
+(6, 4, '2026-01-30 09:14:56', '2026-01-30 09:15:12', 3, 1, 6000, 'keluar', 3, 8),
+(7, 6, '2026-02-02 09:15:02', '0000-00-00 00:00:00', NULL, 0, 0, 'masuk', 2, 8),
+(8, 6, '2026-02-02 12:39:01', '0000-00-00 00:00:00', NULL, 0, 0, 'masuk', 2, 8),
+(9, 6, '2026-02-03 07:01:15', '0000-00-00 00:00:00', NULL, 0, 0, 'masuk', 4, 8),
+(10, 6, '2026-02-03 07:01:31', '0000-00-00 00:00:00', NULL, 0, 0, 'masuk', 4, 8),
+(11, 4, '2026-02-03 07:02:43', '0000-00-00 00:00:00', NULL, 0, 0, 'masuk', 6, 8);
 
 -- --------------------------------------------------------
 
@@ -222,7 +227,13 @@ ALTER TABLE `tb_area_parkir`
 -- AUTO_INCREMENT untuk tabel `tb_kendaraan`
 --
 ALTER TABLE `tb_kendaraan`
-  MODIFY `id_kendaraan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_kendaraan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT untuk tabel `tb_transaksi`
+--
+ALTER TABLE `tb_transaksi`
+  MODIFY `id_parkir` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_user`
