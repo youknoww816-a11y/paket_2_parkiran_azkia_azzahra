@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 03 Feb 2026 pada 07.21
+-- Waktu pembuatan: 04 Feb 2026 pada 02.14
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -43,7 +43,7 @@ CREATE TABLE `tb_area_parkir` (
 INSERT INTO `tb_area_parkir` (`id_area`, `nama_area`, `tipe_kendaraan`, `kapasitas`, `terisi`, `status_area_parkir`) VALUES
 (6, '1MB', 'motor', 20, 0, 'ditutup'),
 (7, '2MB', 'motor', 45, 0, 'ditutup'),
-(17, '1MA', 'motor', 50, 10, 'tempat kosong masih tersedia'),
+(17, '1MA', 'motor', 50, 1, 'tempat kosong masih tersedia'),
 (26, '1CA', 'mobil', 17, 0, 'tempat kosong masih tersedia'),
 (27, '1OB', 'lainnya', 10, 1, 'tempat kosong masih tersedia');
 
@@ -70,7 +70,8 @@ CREATE TABLE `tb_kendaraan` (
 INSERT INTO `tb_kendaraan` (`id_kendaraan`, `plat_nomor`, `tipe_kendaraan`, `jenis_kendaraan`, `warna`, `pemilik`, `id_user`) VALUES
 (4, 'D 1010 TSK', 'motor', 'Motor Yamaha', 'Magenta', 'ANOMALI', 6),
 (6, 'B 6716 VRZ', 'motor', 'Motor Honda', 'Merah', 'SA\'ID', 4),
-(9, 'B 6716 ARC', 'lainnya', 'Van', 'Putih', 'UDIN', 2);
+(9, 'B 6716 ARC', 'lainnya', 'Van', 'Putih', 'UDIN', 2),
+(10, 'B 6816 VRZ', 'mobil', 'Mobil Toyota', 'Hitam', 'TEST', 3);
 
 -- --------------------------------------------------------
 
@@ -116,7 +117,7 @@ CREATE TABLE `tb_transaksi` (
   `id_parkir` int(11) NOT NULL,
   `id_kendaraan` int(11) NOT NULL,
   `waktu_masuk` datetime NOT NULL,
-  `waktu_keluar` datetime NOT NULL,
+  `waktu_keluar` datetime DEFAULT NULL,
   `id_tarif` int(11) DEFAULT NULL,
   `durasi_jam` int(5) NOT NULL,
   `biaya_total` decimal(10,0) NOT NULL,
@@ -130,9 +131,14 @@ CREATE TABLE `tb_transaksi` (
 --
 
 INSERT INTO `tb_transaksi` (`id_parkir`, `id_kendaraan`, `waktu_masuk`, `waktu_keluar`, `id_tarif`, `durasi_jam`, `biaya_total`, `status`, `id_user`, `id_area`) VALUES
-(21, 6, '2026-02-03 10:05:09', '0000-00-00 00:00:00', NULL, 0, 0, '', 4, 17),
-(22, 9, '2026-02-03 10:10:24', '0000-00-00 00:00:00', NULL, 0, 0, '', 2, 27),
-(26, 4, '2026-02-03 13:17:26', '0000-00-00 00:00:00', NULL, 0, 0, '', 6, 17);
+(29, 4, '2026-02-03 14:02:14', '2026-02-03 14:02:40', 1, 1, 2000, 'keluar', 6, 17),
+(30, 9, '2026-02-03 14:08:19', NULL, NULL, 0, 0, 'masuk', 2, 27),
+(31, 10, '2026-02-03 14:29:26', '2026-02-03 14:29:54', 2, 1, 5000, 'keluar', 3, 26),
+(32, 10, '2026-02-03 14:36:57', '2026-02-03 14:37:32', 2, 1, 5000, 'keluar', 3, 26),
+(33, 10, '2026-02-03 14:41:17', '2026-02-03 14:54:54', 2, 1, 5000, 'keluar', 3, 26),
+(34, 4, '2026-02-04 07:47:53', '2026-02-04 07:50:03', 1, 1, 2000, 'keluar', 6, 17),
+(35, 4, '2026-02-04 07:50:19', '2026-02-04 07:59:35', 1, 1, 2000, 'keluar', 6, 17),
+(36, 4, '2026-02-04 07:59:52', NULL, NULL, 0, 0, 'masuk', 6, 17);
 
 -- --------------------------------------------------------
 
@@ -154,10 +160,10 @@ CREATE TABLE `tb_user` (
 --
 
 INSERT INTO `tb_user` (`id_user`, `nama_lengkap`, `username`, `password`, `role`, `status_aktif`) VALUES
-(2, 'UDIN', 'saha_maneh', '$2y$10$gPfQzGcu.3sY1qMkOK0I9eJmogH/Mq5ihlUKXt9eftX3AbnplN2/y', 'owner', 1),
-(3, 'TEST', 'test123', '$2y$10$VaDO5nHDwYQ500e0XtGp5eE1v6zXEG6yBT2VcIBAfG.sOIYmER04i', 'admin', 1),
+(2, 'UDIN', 'saha_maneh', '$2y$10$TdQznjjxRPRZwos3KZ2CfOmoUCYV53i2N6QbAFaahGO9wB2TXeheK', 'owner', 1),
+(3, 'TEST', 'test123', '$2y$10$jBVjqTr1c9CVnTGk/976TOX6MbTitoUtJcO.GfoJFKnkYRhKUyAu2', 'admin', 1),
 (4, 'SA\'ID', 'bisa_diandalkan', '$2y$10$b5U1Ql0WgaJc4ukwoFX/BOAG5orQf1W7R6r/Jq6b3POsSjz11ZB1G', 'petugas', 1),
-(6, 'ANOMALI', 'decade010', '$2y$10$rum.kCW3FyslvammfQ1bVuMxb.ovobxAzxYbVkxllwqxCtN8hdw/G', 'admin', 1);
+(6, 'ANOMALI', 'decade010', '$2y$10$BVi0ajvJu1hCVA.1.cpbLulmOg.GoxMIcFIK83hIKprGrQqgo24eq', 'admin', 1);
 
 --
 -- Indexes for dumped tables
@@ -219,13 +225,13 @@ ALTER TABLE `tb_area_parkir`
 -- AUTO_INCREMENT untuk tabel `tb_kendaraan`
 --
 ALTER TABLE `tb_kendaraan`
-  MODIFY `id_kendaraan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id_kendaraan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_transaksi`
 --
 ALTER TABLE `tb_transaksi`
-  MODIFY `id_parkir` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id_parkir` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_user`

@@ -41,11 +41,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (password_verify($password, $user['password'])) {
         session_regenerate_id(true);
-        $_SESSION['id_user'] = $user['Id'];
-        $_SESSION['nama_lengkap'] = $user['Nama'];
-        $_SESSION['username'] = $user['Username'];
-        $_SESSION['role'] = $user['Role'];
-        $_SESSION['status_aktif'] = time();
+        $_SESSION['id_user'] = $user['id_user'];
+        $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['role'] = $user['role'];
 
         if ($user['role'] === 'admin') {
             header("Location: dashboard_parkiran.php");
@@ -80,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <!DOCTYPE html>
-
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -88,9 +87,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="desain_parkir.css">
 
 </head>
-<body>
+
+<body class="body-login">
+    <div class="login-wrapper">
+        
     <div class="login-container">
         <h2>Login</h2>
+        
         <?php if (!empty($message)): ?>
             <div class="message error" role="alert">
                 <?php echo htmlspecialchars($message); ?>

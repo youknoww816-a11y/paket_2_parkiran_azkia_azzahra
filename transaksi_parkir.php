@@ -90,6 +90,13 @@ if ($username !== '') {
                     $id_area = $area['id_area'];
                     $now = date('Y-m-d H:i:s');
 
+                    $qDetailArea = $conn->query("
+                    SELECT nama_area
+                    FROM tb_area_parkir
+                    WHERE id_area = $id_area
+                    ");
+                    $detail_area = $qDetailArea->fetch_assoc();
+
                     // STATUS DISAMAKAN DENGAN DATABASE
                     $conn->query("
                         INSERT INTO tb_transaksi (
@@ -216,6 +223,8 @@ if ($username !== '') {
 
     <!-- CSS -->
     <link rel="stylesheet" href="desain_parkir.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">

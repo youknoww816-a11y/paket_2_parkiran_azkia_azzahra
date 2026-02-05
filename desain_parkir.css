@@ -13,22 +13,102 @@ body {
     width: 100%;
 }
 
-.login-container {
-    width: 100%;
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 25px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    background-color: #fff;
+/* ================== Halaman Login ===================== */
+
+body.body-login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top left, #c9e1fd),
+        radial-gradient(circle at bottom right, #60a5fa6c),
+        linear-gradient(180deg, #e9f2ff, #ecf0f5);
 }
 
-.login-container h2 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 25px;
+/* Wrapper khusus login */
+.login-wrapper {
+    width: 100%;
+    padding: 20px;
 }
+
+/* Card login */
+body.body-login .login-container {
+    max-width: 420px;
+    margin: auto;
+    padding: 32px 30px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    box-shadow: 0 15px 30px rgba(37, 99, 235, 0.15), 0 5px 10px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Accent bar */
+body.body-login .login-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 6px;
+    width: 100%;
+    background: linear-gradient(90deg, #2563eb, #38bdf8);
+}
+
+/* Title */
+body.body-login .login-container h2 {
+    text-align: center;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 6px;
+}
+
+body.body-login .login-container h2::after {
+    content: "Sistem Parkir";
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: #64748b;
+    margin-top: 6px;
+}
+
+/* Input */
+body.body-login .login-container input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.95rem;
+    margin-bottom: 14px;
+    transition: all 0.2s ease;
+}
+
+body.body-login .login-container input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+    outline: none;
+}
+
+/* Button */
+body.body-login .login-container button[type="submit"] {
+    width: 100%;
+    padding: 13px;
+    border-radius: 12px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(90deg, #2563eb, #38bdf8);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.body-login .login-container button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(37,99,235,0.35);
+}
+
 
 
 /* ====== Modal ====== */
@@ -93,6 +173,9 @@ body {
     }
 }
 
+:root {
+    --sidebar-width: 250px;
+}
 
 .mode-toggle {
     position: absolute;
@@ -108,18 +191,24 @@ body {
 .sidebar {/* Tampilan sidebar utama */
     position: fixed;
     top: 0;
-    left: -250px;
-    width: 250px;
+    width: var(--sidebar-width);
+    left: calc(-1 * var(--sidebar-width));
     height: 100vh;
-    background: linear-gradient(to bottom, #007bff, #0056b3);
+    background: linear-gradient(to bottom, #62a7f0, #2e93ff);
     color: white;
     padding: 20px;
     box-shadow: 3px 0 10px rgba(0,0,0,0.2);
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
     z-index: 1000;
     transition: left 0.3s ease-in-out;
+    overflow-y: scroll; /* atau auto */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE dan Edge lama */
+}
+
+.sidebar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, dan Opera */
 }
 
 #reader {
@@ -143,7 +232,7 @@ body {
     border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 
-.logo-img { /* Bandung pride */
+.logo-img { /* Placeholder, karena aku enggak punya logo */
     width: 100px;
     height: auto;
     margin-bottom: 15px;
@@ -179,11 +268,22 @@ body {
     font-weight: 500;
 }
 
-.sidebar-nav a:hover,
-.sidebar-nav a.active {
+.sidebar-nav a:hover{
     background-color: rgba(255,255,255,0.15);
     color: #ffffff;
     transform: translateX(5px);
+}
+
+.sidebar-nav a.active {
+    background-color: rgba(255,255,255,0.3); 
+    color: #ffffff;
+    transform: none; 
+}
+
+.submenu a.active {
+    background-color: rgba(255,255,255,0.3);
+    color: #ffffff;
+    transform: none;
 }
 
 .sidebar-nav a i {
@@ -199,6 +299,71 @@ body {
     overflow: hidden;
     padding: 0;
     transition: all 0.3s ease;
+}
+
+.sidebar-toggle { /* Tombol pop-up garis 3, bukan biru */
+    display: block; 
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #258eff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.sidebar-toggle:hover { /* Warna transisi garis 3*/
+    color: #ffffff;
+    background-color: #80c2ff;
+}
+
+.sidebar-toggle.active { /* Tampilan untuk tombol garis 3 (aktif) */
+    left: 245px; 
+    transition: left 0.3s ease;
+    background-color: #80c2ff;
+}
+
+/*Toggle dalam sidebar (Menu dalam Menu) */
+
+.submenu {
+    display: none;
+    padding-left: 20px;
+    flex-direction: column;
+    margin-top: 5px;
+    transition: all 0.3s ease;
+}
+
+.submenu li {
+    margin-bottom: 5px;
+}
+
+.submenu.show {
+    display: flex;
+}
+
+.has-submenu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.submenu-icon {
+    font-size: 0.8em;
+    transition: transform 0.3s ease;
+}
+
+.has-submenu.active .submenu-icon {
+    transform: rotate(180deg);
+}
+
+.submenu .active {
+    background-color: rgba(255,255,255,0.3);
+    color: #fff;
 }
 
 .main-content.full {
@@ -786,9 +951,9 @@ textarea {
 button {
     background-color: #28a745; /* Warna tombol-tobol umum yang warna 🟢 */
     color: white;
-    padding: 12px 25px;
+    padding: 12px 25px ;
     border: none;
-    border-radius: 6px;
+    border-radius: 6px !important;
     cursor: pointer;
     font-size: 1.1em;
     font-weight: 500;
@@ -916,31 +1081,6 @@ hr {
 .action-link.delete-link:hover {
     background-color: #c82333;
     transform: translateY(-1px);
-}
-.sidebar-toggle { /* Tombol pop-up garis 3, bukan biru */
-    display: block; 
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    background: #258eff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    font-size: 24px;
-    border-radius: 6px;
-    cursor: pointer;
-    z-index: 1001;
-}
-
-.sidebar-toggle:hover { /* Warna transisi garis 3*/
-    color: #ffffff;
-    background-color: #80c2ff;
-}
-
-.sidebar-toggle.active { /* Tampilan untuk tombol garis 3 (aktif) */
-    left: 270px; 
-    transition: left 0.3s ease;
-    background-color: #80c2ff;
 }
 
 /* Menu pengganti Sidebar, Ribbon*/

@@ -81,10 +81,23 @@ document.addEventListener('DOMContentLoaded', function () {
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.querySelector('.main-content');
 
+    // === 1. Baca status sidebar dari localStorage saat halaman dibuka ===
+    const sidebarState = localStorage.getItem('sidebarState');
+
+    if (sidebarState === 'open') {
+        sidebar.classList.add('active');
+        toggleButton.classList.add('active');
+        if (mainContent) mainContent.classList.add('shifted');
+    }
+
+    // === 2. Toggle + simpan status ===
     toggleButton.addEventListener('click', function () {
-        sidebar.classList.toggle('active');
+        const isActive = sidebar.classList.toggle('active');
         toggleButton.classList.toggle('active');
         if (mainContent) mainContent.classList.toggle('shifted');
+
+        // Simpan status
+        localStorage.setItem('sidebarState', isActive ? 'open' : 'closed');
     });
 });
 </script>

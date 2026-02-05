@@ -1,10 +1,12 @@
 <?php
 include 'koneksi_parkir.php';
-// include 'proteksi_user_parkir.php'; // nanti bareng login
+// include 'proteksi_user_parkir.php';
 $active_page = 'dashboard_parkiran';
 
 date_default_timezone_set('Asia/Jakarta');
 $tanggal_hari_ini = date('Y-m-d');
+
+
 // Note : ini enggak bakal dihapus dulu, siapa tau disuruh ngebuat tema, untuk sementara jadi placeholder
 //$query = $conn->query("SELECT tema, tampilan_menu, running_text_dashboard, kecepatan_running_text_dashboard FROM tb_tampilan LIMIT 1");
 //if ($row = $query->fetch_assoc()) {
@@ -52,20 +54,24 @@ $message_type = '';
 ======================= */
 if ($conn && !$conn->connect_error) {
 
-    // Total kendaraan terdaftar
+    /* TOTAL KENDARAAN TERDAFTAR */
     $res = $conn->query("SELECT COUNT(*) AS total FROM tb_kendaraan");
     if ($res) {
         $total_kendaraan = (int)$res->fetch_assoc()['total'];
     }
 
-    // Kendaraan sedang parkir (per jenis)
+    /* ============================
+       KENDARAAN MASIH TERPARKIR
+       (STATUS = 'masuk', SEMUA HARI)
+       ============================ */
     $sql = "
-        SELECT t.jenis_kendaraan, COUNT(*) AS jumlah
+        SELECT k.jenis_kendaraan, COUNT(*) AS jumlah
         FROM tb_transaksi tr
-        JOIN tb_tarif t ON tr.id_tarif = t.id_tarif
+        JOIN tb_kendaraan k ON tr.id_kendaraan = k.id_kendaraan
         WHERE tr.status = 'masuk'
-        GROUP BY t.jenis_kendaraan
+        GROUP BY k.jenis_kendaraan
     ";
+
     $res = $conn->query($sql);
     if ($res) {
         while ($row = $res->fetch_assoc()) {
@@ -84,32 +90,42 @@ if ($conn && !$conn->connect_error) {
         $total_mobil_terparkir +
         $total_lainnya_terparkir;
 
-    // Kendaraan masuk hari ini (SEMUA jenis)
+    /* ============================
+       KENDARAAN MASUK HARI INI
+       ============================ */
+       
     $stmt = $conn->prepare("
         SELECT COUNT(*) 
         FROM tb_transaksi 
         WHERE DATE(waktu_masuk) = ?
     ");
+
     $stmt->bind_param("s", $tanggal_hari_ini);
     $stmt->execute();
     $stmt->bind_result($total_kendaraan_masuk_hari_ini);
     $stmt->fetch();
     $stmt->close();
 
-    // Kendaraan keluar hari ini (SEMUA jenis)
+    /* ============================
+       KENDARAAN KELUAR HARI INI
+       ============================ */
+       
     $stmt = $conn->prepare("
         SELECT COUNT(*) 
         FROM tb_transaksi 
         WHERE status = 'keluar'
         AND DATE(waktu_keluar) = ?
     ");
+
     $stmt->bind_param("s", $tanggal_hari_ini);
     $stmt->execute();
     $stmt->bind_result($total_kendaraan_keluar_hari_ini);
     $stmt->fetch();
     $stmt->close();
 
-    // DATA CHART (STATUS)
+    /* ============================
+       DATA CHART
+       ============================ */
     $data_chart['masuk'] = $total_kendaraan_masuk_hari_ini;
     $data_chart['keluar'] = $total_kendaraan_keluar_hari_ini;
     $data_chart['masih_parkir'] = $total_semua_kendaraan_terparkir;
@@ -128,12 +144,13 @@ $chart_data_json = json_encode($data_chart);
     <meta charset="UTF-8">
     <title>Dashboard Parkir</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link rel="stylesheet" href="desain_parkir.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
