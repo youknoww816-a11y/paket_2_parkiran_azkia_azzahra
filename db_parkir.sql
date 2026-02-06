@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 04 Feb 2026 pada 02.14
+-- Waktu pembuatan: 06 Feb 2026 pada 02.22
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -43,9 +43,9 @@ CREATE TABLE `tb_area_parkir` (
 INSERT INTO `tb_area_parkir` (`id_area`, `nama_area`, `tipe_kendaraan`, `kapasitas`, `terisi`, `status_area_parkir`) VALUES
 (6, '1MB', 'motor', 20, 0, 'ditutup'),
 (7, '2MB', 'motor', 45, 0, 'ditutup'),
-(17, '1MA', 'motor', 50, 1, 'tempat kosong masih tersedia'),
+(17, '1MA', 'motor', 50, 0, 'tempat kosong masih tersedia'),
 (26, '1CA', 'mobil', 17, 0, 'tempat kosong masih tersedia'),
-(27, '1OB', 'lainnya', 10, 1, 'tempat kosong masih tersedia');
+(27, '1OB', 'lainnya', 10, 0, 'tempat kosong masih tersedia');
 
 -- --------------------------------------------------------
 
@@ -132,13 +132,16 @@ CREATE TABLE `tb_transaksi` (
 
 INSERT INTO `tb_transaksi` (`id_parkir`, `id_kendaraan`, `waktu_masuk`, `waktu_keluar`, `id_tarif`, `durasi_jam`, `biaya_total`, `status`, `id_user`, `id_area`) VALUES
 (29, 4, '2026-02-03 14:02:14', '2026-02-03 14:02:40', 1, 1, 2000, 'keluar', 6, 17),
-(30, 9, '2026-02-03 14:08:19', NULL, NULL, 0, 0, 'masuk', 2, 27),
+(30, 9, '2026-02-03 14:08:19', '2026-02-05 13:31:54', 3, 48, 35000, 'keluar', 2, 27),
 (31, 10, '2026-02-03 14:29:26', '2026-02-03 14:29:54', 2, 1, 5000, 'keluar', 3, 26),
 (32, 10, '2026-02-03 14:36:57', '2026-02-03 14:37:32', 2, 1, 5000, 'keluar', 3, 26),
 (33, 10, '2026-02-03 14:41:17', '2026-02-03 14:54:54', 2, 1, 5000, 'keluar', 3, 26),
 (34, 4, '2026-02-04 07:47:53', '2026-02-04 07:50:03', 1, 1, 2000, 'keluar', 6, 17),
 (35, 4, '2026-02-04 07:50:19', '2026-02-04 07:59:35', 1, 1, 2000, 'keluar', 6, 17),
-(36, 4, '2026-02-04 07:59:52', NULL, NULL, 0, 0, 'masuk', 6, 17);
+(36, 4, '2026-02-04 07:59:52', '2026-02-04 08:24:55', 1, 1, 2000, 'keluar', 6, 17),
+(37, 4, '2026-02-04 08:25:53', '2026-02-04 08:26:44', 1, 1, 2000, 'keluar', 6, 17),
+(38, 4, '2026-02-04 08:27:13', '2026-02-04 08:28:45', 1, 1, 2000, 'keluar', 6, 17),
+(39, 4, '2026-02-06 06:50:52', '2026-02-06 06:51:06', 1, 1, 2000, 'keluar', 6, 17);
 
 -- --------------------------------------------------------
 
@@ -231,7 +234,7 @@ ALTER TABLE `tb_kendaraan`
 -- AUTO_INCREMENT untuk tabel `tb_transaksi`
 --
 ALTER TABLE `tb_transaksi`
-  MODIFY `id_parkir` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id_parkir` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_user`

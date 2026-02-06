@@ -173,6 +173,13 @@ body.body-login .login-container button[type="submit"]:hover {
     }
 }
 
+/* Untuk memberi jarak pada konten tertentu */
+.empty-space {
+    margin-bottom: 20px; 
+    margin-left: 10px;  
+    padding: 15px; 
+}
+
 :root {
     --sidebar-width: 250px;
 }
@@ -362,7 +369,7 @@ body.body-login .login-container button[type="submit"]:hover {
 }
 
 .submenu .active {
-    background-color: rgba(255,255,255,0.3);
+    background-color: rgba(255,255,255,0.3) !important;
     color: #fff;
 }
 
@@ -611,6 +618,8 @@ body.body-login .login-container button[type="submit"]:hover {
     padding: 6px !important;
     border: none !important;
     box-shadow: none !important;
+    font-size: 1.5rem;           /* ukuran icon */
+    margin-bottom: 10px;
 }
 
 .toolbar-parkir button:hover {
@@ -715,6 +724,7 @@ button[data-tooltip]:hover::before {
 
 .search-wrapper select {
     width: 180px;
+    margin-bottom: 10px;
 }
 
 .search-wrapper input {

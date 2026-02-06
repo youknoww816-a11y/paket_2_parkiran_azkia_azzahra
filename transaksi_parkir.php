@@ -223,6 +223,10 @@ if ($username !== '') {
 
     <!-- CSS -->
     <link rel="stylesheet" href="desain_parkir.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -230,6 +234,7 @@ if ($username !== '') {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    
 </head>
 
 <body>    
@@ -375,6 +380,28 @@ updateDigitalTime();
 </html>
 
 <!-- Note:
-           Mungkin durasi seberapa lama parkir perlu diperbaiki. . . 
-           Sama mungkin kamu harus input password. . . 
--->
+5 Februari 2026 :
+
+    Mungkin durasi seberapa lama parkir perlu diperbaiki. . . 
+    Sama mungkin kamu harus input password. . . 
+
+6 Februari 2026 :
+
+    Baru dikasih tau, kurang lebih katanya untuk mengabil tiket parkir memasukan username itu kaya enggak masuk akal. . .
+
+    Aku awalnya juga mau pengguna itu masukin plat nomor untuk ngambil tiket parkir, tapi karean di contoh aja plat nomor
+    itu bukan primary key apalagi unique key jadi aku pake username aja.
+
+    Secara realistis, masuk parkir aja kamu hanya perlu menekan 1 tombol lalu tiket keluar tanpa perlu menginput
+    plat nomor atau nama. . .
+
+    Tapi karena itu menggunakan mesin dan ada penjaganya, bukan aplikasi yang jelas belum sempurna + dibuat 1 bulan.
+
+    Aku awalnya juga mau ngebuat scan QR untuk mengambil tiket biar lebih simple dan realistis untuk pengguna.
+    Sayangnya tugas ini cuma 1 bulan.
+    
+    Aku ngebuat website absensi siswa aja yang menggunakan scan QR perlu 3 bulan lebih untuk bekerja sesuai keinginan.
+    Itu juga masih ada beberapa bug kecil.
+
+    Sama aku belum ngebuat untuk download pdf atau print
+           -->
