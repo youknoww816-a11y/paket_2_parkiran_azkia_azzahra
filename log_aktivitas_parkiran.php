@@ -1,7 +1,8 @@
 <?php
-include 'koneksi_parkir.php';
-
 $active_page = 'log_aktivitas_parkiran';
+
+include 'koneksi_parkir.php';
+include 'proteksi_role_parkir.php';
 
 /* ===============================
    1. FILTER TANGGAL
@@ -121,7 +122,7 @@ $q_keluar->bind_result($g_total_kendaraan_keluar);
 $q_keluar->fetch();
 $q_keluar->close();
 
-// Kendaraan masih terparkir (GLOBAL)
+// Kendaraan masih terparkir (dari hari kapanpun itu selama kendaraan belum keluar)
 $q_parkir = $conn->query("
     SELECT COUNT(*) 
     FROM tb_transaksi 
@@ -144,7 +145,7 @@ $q_transaksi->close();
 
 $g_total_transaksi = $g_total_transaksi ?? 0;
 ?>
-<!-- Ini line ke 127 -->
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -154,13 +155,11 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
     <title>Log Laporan Parkiran | Aktivitas Bulan Ini</title>
     <link rel="stylesheet" href="desain_parkir.css">
         <link rel="stylesheet" href="desain_parkir.css">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
         <div class="wrapper">
             <?php include 'sidebar_parkiran.php'; ?>
@@ -204,7 +203,7 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
     <div class="summary-card"><h4>Total Kendaraan Masuk</h4><p><?php echo $g_total_kendaraan_masuk;?> </p></div>
     <div class="summary-card"><h4>Total Kendaraan Keluar</h4><p><?php echo $g_total_kendaraan_keluar;?> </p></div>
     <div class="summary-card"><h4>Total Kendaraan Yang Masih Terparkir</h4><p><?php echo $g_total_kendaraan_terparkir;?></p></div>
-    <div class="summary-card"><h4>Total Transaksi </h4><p><?php echo $g_total_transaksi;?></p></div> <!-- Ini untuk kalau total rupiah dari semua kendaraan yang telah bayar keluar parkir bulan ini -->
+    <div class="summary-card"><h4>Total Transaksi</h4><p>Rp <?= number_format($g_total_transaksi, 0, ',', '.') ?></p></div> <!-- Ini untuk kalau total rupiah dari semua kendaraan yang telah bayar keluar parkir bulan ini -->
 </div>
 
 </div>
@@ -213,6 +212,8 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
 
     <!-- TOOLBAR -->
      <div class="toolbar-parkir">
+        <button id="btnReset" data-tooltip="Reset" ><i class="fa-solid fa-rotate-right"></i></button>
+
         <div class="filter-container">
             <button id="btnFilter" data-tooltip="Sortir"><i class="fa-solid fa-filter"></i></button>
             <div id="filterMenu" class="filter-menu hidden">
@@ -252,9 +253,9 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
                             <th>Jenis</th>
                             <th>Plat Nomor</th>
                             <th>Warna</th>
-                            <th>Status</th> <!-- Ini isinya panjang lebar kaya status masuk atau keluar dan waktunya digabung, makanya kita bakal pake yb_log_aktivitas kolom aktivitas varchar 100 -->
-                            <th>Tarif</th> <!-- Kalau baru masuk tulis keterangan 'Kendaraan masih di area parkir -->
-                            <th>Durasi</Th> <!-- Agar tau berapa lama kendaraan masih terparkir -->
+                            <th>Status</th>
+                            <th>Tarif</th>
+                            <th>Durasi</Th>
                             <th>Area parkir</th>
                         </tr>
                     </thead>
@@ -288,13 +289,13 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
             <td><?= htmlspecialchars($row['aktivitas']) ?></td>
 
             <!-- Tarif -->
-            <td>
-                <?php if ($row['status'] === 'masuk'): ?>
-                    <em>Kendaraan masih di area parkir</em>
-                <?php else: ?>
-                    Rp <?= number_format($row['tarif_per_jam'], 0, ',', '.') ?>/jam
-                <?php endif; ?>
-            </td>
+             <td>
+                <?php if ($row['status'] === 'keluar'): ?>
+                    Rp <?= number_format($row['biaya_total'], 0, ',', '.') ?>
+                    <?php else: ?>
+                        <em>Kendaraan masih di area parkir</em>
+                        <?php endif; ?>
+                    </td>
 
             <!-- Durasi -->
             <td><?= $durasi ?> jam</td>
@@ -312,68 +313,125 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
     </tr>
 <?php endif; ?>
 
-</tbody>
+                    </tbody>
                 </table>
 
-
-
-<!-- Dropdown Search -->
+<!-- Toolbar agar bisa bekerja -->
 <script>
-document.getElementById('searchBox').addEventListener('keyup', function () {
-    const keyword = this.value.toLowerCase();
-    const type = document.getElementById('searchType').value;
-    const rows = document.querySelectorAll("table tr");
+document.addEventListener('DOMContentLoaded', function () {
 
-    rows.forEach((row, index) => {
-        if (index === 0) return; // skip header
+    const searchBox   = document.getElementById('searchBox');
+    const searchType  = document.getElementById('searchType');
+    const btnFilter   = document.getElementById('btnFilter');
+    const filterMenu  = document.getElementById('filterMenu');
+    const btnReset    = document.getElementById('btnReset');
 
-        let cellText = "";
+    const monthInput  = document.getElementById('month');
+    const startDate   = document.getElementById('start_date');
+    const endDate     = document.getElementById('end_date');
 
-        if (type === "jenis") {
-            cellText = row.cells[2].innerText.toLowerCase(); // kolom jenis
-        } else if (type === "pemilik") {
-            cellText = row.cells[4].innerText.toLowerCase(); // kolom pemilik
-        }
+    const tbody = document.querySelector("tbody");
+    let rows    = Array.from(tbody.querySelectorAll("tr"));
 
-        row.style.display = cellText.includes(keyword) ? "" : "none";
+    const originalRows = rows.map(row => row.cloneNode(true));
+
+/* ===================== Searchbox? Searchbar? taulah ya  ====================== */
+
+    searchBox.addEventListener('keyup', function () {
+        const keyword = this.value.toLowerCase();
+        const type    = searchType.value;
+
+        rows.forEach(row => {
+            let text = "";
+
+            switch (type) {
+                case "username":   text = row.cells[0].innerText; break;
+                case "pemilik":    text = row.cells[1].innerText; break;
+                case "jenis":      text = row.cells[3].innerText; break;
+                case "plat_nomor": text = row.cells[4].innerText; break;
+                case "warna":      text = row.cells[5].innerText; break;
+                default:
+                    row.style.display = "";
+                    return;
+            }
+
+            row.style.display = text.toLowerCase().includes(keyword) ? "" : "none";
+        });
     });
-});
-</script>    
 
-
-<!-- -->
-<script>
-const searchType = document.getElementById('searchType');
-const searchBox = document.getElementById('searchBox');
-
-searchType.addEventListener('change', function () {
-    if (this.value === "") {
-        searchBox.disabled = true;
+    searchType.addEventListener('change', function () {
         searchBox.value = "";
-        searchBox.placeholder = "Pilih filter dulu...";
-    } else {
-        searchBox.disabled = false;
-        searchBox.placeholder = "Cari " + this.options[this.selectedIndex].text + "...";
         searchBox.focus();
-    }
-});
-
-searchBox.addEventListener('keyup', function () {
-    const keyword = this.value.toLowerCase();
-    const type = searchType.value;
-    const rows = document.querySelectorAll("table tr");
-
-    rows.forEach((row, index) => {
-        if (index === 0) return;
-
-        let text = "";
-        if (type === "jenis") {
-            text = row.cells[2].innerText.toLowerCase();
-        } else if (type === "pemilik") {
-            text = row.cells[4].innerText.toLowerCase();
-        }
-
-        row.style.display = text.includes(keyword) ? "" : "none";
     });
+
+/* ===================== Soltir ====================== */
+
+    document.querySelectorAll('#filterMenu button').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const filter = this.dataset.sort;
+
+            rows.forEach(row => {
+                const tipe = row.cells[2].innerText.toLowerCase();
+
+                if (!filter || tipe === filter) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            /* SORT TANGGAL TERLAMA */
+            if (filter === "") {
+                rows.sort((a, b) => {
+                    return new Date(a.cells[6].innerText) - new Date(b.cells[6].innerText);
+                });
+
+                rows.forEach(row => tbody.appendChild(row));
+            }
+
+            filterMenu.classList.add('hidden');
+        });
+    });
+
+/* ===================== Toggle menu sortir ====================== */
+
+    btnFilter.addEventListener('click', function (e) {
+        e.stopPropagation();
+        filterMenu.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', function () {
+        filterMenu.classList.add('hidden');
+    });
+
+    filterMenu.addEventListener('click', function (e) {
+        e.stopPropagation();
+    });
+
+/* ===================== Reset fiter tanggal, sortir, dan cari ====================== */
+    
+    btnReset.addEventListener('click', function () {
+
+        /* Reset tanggal */
+        monthInput.value = "";
+        startDate.value  = "";
+        endDate.value    = "";
+
+        /* Reset search */
+        searchBox.value = "";
+        searchType.value = "jenis";
+
+        /* Reset table */
+        tbody.innerHTML = "";
+        originalRows.forEach(row => tbody.appendChild(row.cloneNode(true)));
+
+        rows = Array.from(tbody.querySelectorAll("tr"));
+
+        filterMenu.classList.add('hidden');
+    });
+
 });
 </script>
+
+</body>
+</html>

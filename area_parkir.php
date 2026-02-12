@@ -1,8 +1,10 @@
 <?php
 session_start();
-include 'koneksi_parkir.php';
 
 $active_page = 'area_parkir';
+
+include 'koneksi_parkir.php';
+include 'proteksi_role_parkir.php';
 
 $message = '';
 $message_type = '';
@@ -160,33 +162,6 @@ if (isset($_GET['msg'])) {
         </div>
     <?php endif; ?>
 
-    <!-- ================= PLACEHOLDER, JANGAN DULU DIPAKE! =================
-        ================== VISUAL AREA PARKIR ==================
-
-     <div class="card mb-4">
-        <div class="card-header">
-            <strong>Visual Area Parkir</strong>
-        </div>
-        
-        <div class="card-body">
-            <div class="area-visual d-flex flex-wrap gap-3">
-                <//?php foreach ($area as $a): 
-                    $class = $a['status_final'] == 'penuh' ? 'full' :
-                            ($a['status_final'] == 'ditutup' ? 'closed' : 'empty');
-                ?>
-                    <div class="area-box <//?= $class ?>">
-                        <div class="icon">🚗</div>
-                        <strong><//?= $a['nama_area'] ?></strong>
-                        <div class="info">
-                            <//?= $a['terisi'] ?> / <//?= $a['kapasitas'] ?><br>
-                            <//?= strtoupper($a['status_final']) ?>
-                        </div>
-                    </div>
-                <//?php endforeach; ?>
-            </div>
-        </div>
-    </div>
-                -->
         <div class="row">
                 <div class="p-4">
 
@@ -206,6 +181,7 @@ if (isset($_GET['msg'])) {
                 <div class="col-md-4 d-flex align-items-end">
                     <a href="area_parkir.php" class="btn btn-outline-secondary"><i class="fas fa-refresh me-2"></i>Reset Filter</a>
                 </div>
+                
         <!-- Modal Form Tambah Area Parkir -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambah"><i class="fas fa-plus"></i> Tambah Area Parkir</button>

@@ -1,7 +1,8 @@
 <?php
-include 'koneksi_parkir.php';
-
 $active_page = 'tambah_user_parkir.php';
+
+include 'koneksi_parkir.php';
+include 'proteksi_role_parkir.php';
 
 $message = '';
 $type = '';
@@ -218,8 +219,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </main>
 </div>
 
+<!-- Agar input password bisa dilihat  -->
 <script>
-    // Toggle 👁️ untuk password
     document.getElementById('togglePassword').addEventListener('click', function () {
         const input = document.getElementById('password');
         const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
@@ -249,6 +250,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     });
 </script>
 
+<!--Searchbox/Searchbar. . . intinya cari -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const searchBox = document.getElementById("searchBox");
@@ -280,4 +282,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </body>
 </html>
 
-
+<!-- Note :
+        Yup, password user itu gampang untuk diubah KALAU kamu itu admin
+        makanya kita perlu orang yang jujur dan hati-hati jangan sampai kaya pem-(isi sendiri)
+-->

@@ -1,14 +1,17 @@
 <?php
 session_start();
 date_default_timezone_set('Asia/Jakarta');
-include 'koneksi_parkir.php';
 
 $active_page = 'transaksi_parkir';
+
+include 'koneksi_parkir.php';
+include 'proteksi_role_parkir.php';
 
 $message = '';
 $message_type = '';
 
 $data_tiket = null;
+$_SESSION['tiket_terakhir'] = $data_tiket;
 $status_terakhir = null;
 
 $aksi = $_POST['aksi'] ?? null;
@@ -17,6 +20,12 @@ $username = trim($_POST['username'] ?? '');
 /* ===============================
    AMBIL USER + KENDARAAN
    =============================== */
+
+/* Note: Aturan parkir aku itu 1 kendaraan = 1 user
+        Iya, mungkin tidak praktis, iya tidak realistis karena kalau kamu parkir kamu cukup menekan 1 tombol selesai,
+        tapi apakah sesuai dengan format ujikom?
+        harusnya iya walaupun tidak realistis dan praktis */
+
 if ($username !== '') {
 
     $stmt = $conn->prepare("
@@ -27,7 +36,8 @@ if ($username !== '') {
             k.jenis_kendaraan,
             k.warna,
             u.id_user,
-            u.nama_lengkap
+            u.nama_lengkap,
+            u.username
         FROM tb_kendaraan k
         JOIN tb_user u ON k.id_user = u.id_user
         WHERE u.username = ?
@@ -46,9 +56,10 @@ if ($username !== '') {
         $id_kendaraan = $kendaraan['id_kendaraan'];
         $id_user      = $kendaraan['id_user'];
         $tipe         = strtolower($kendaraan['tipe_kendaraan']);
+        $username_db  = $kendaraan['username'];
 
         /* ===============================
-           CEK TRANSAKSI TERAKHIR (STATE)
+           CEK TRANSAKSI TERAKHIR
            =============================== */
         $cek = $conn->query("
             SELECT *
@@ -64,16 +75,14 @@ if ($username !== '') {
         /* =================== MASUK PARKIR =================== */
         if ($aksi === 'masuk') {
 
-            // JIKA STATUS TERAKHIR MASIH 'MASUK', TOLAK
             if ($status_terakhir === 'masuk') {
                 $message = "Kendaraan masih terparkir dan belum keluar.";
                 $message_type = "error";
-
             } else {
 
                 $qArea = $conn->query("
-                    SELECT id_area 
-                    FROM tb_area_parkir 
+                    SELECT id_area, nama_area
+                    FROM tb_area_parkir
                     WHERE tipe_kendaraan = '$tipe'
                     AND status_area_parkir = 'tempat kosong masih tersedia'
                     AND terisi < kapasitas
@@ -88,16 +97,10 @@ if ($username !== '') {
 
                     $area = $qArea->fetch_assoc();
                     $id_area = $area['id_area'];
+                    $nama_area = $area['nama_area'];
                     $now = date('Y-m-d H:i:s');
 
-                    $qDetailArea = $conn->query("
-                    SELECT nama_area
-                    FROM tb_area_parkir
-                    WHERE id_area = $id_area
-                    ");
-                    $detail_area = $qDetailArea->fetch_assoc();
-
-                    // STATUS DISAMAKAN DENGAN DATABASE
+                    /* INSERT TRANSAKSI MASUK */
                     $conn->query("
                         INSERT INTO tb_transaksi (
                             id_kendaraan,
@@ -114,6 +117,18 @@ if ($username !== '') {
                         )
                     ");
 
+                /* LOG AKTIVITAS MASUK */
+
+                /* Note: Aku itu baru ngebuat logika itu diakhir, makanya di log_aktivitas_parkir sama
+                        rekap_transaksi_parkir itu pake tb_transaksi, bukan tb_log-aktivitas */  
+
+                    $aktivitas = "Masuk parkir - {$kendaraan['plat_nomor']} ({$kendaraan['jenis_kendaraan']}) di area $nama_area";
+
+                    $conn->query("
+                        INSERT INTO tb_log_aktivitas (id_user, aktivitas, waktu_aktivitas)
+                        VALUES ($id_user, '$aktivitas', NOW())
+                    ");
+
                     $conn->query("
                         UPDATE tb_area_parkir 
                         SET terisi = terisi + 1
@@ -127,7 +142,7 @@ if ($username !== '') {
                         'mode' => 'MASUK',
                         'waktu_masuk' => $now,
                         'kendaraan' => $kendaraan,
-                        'area' => $detail_area
+                        'area' => ['nama_area' => $nama_area]
                     ];
                 }
             }
@@ -136,7 +151,6 @@ if ($username !== '') {
         /* =================== KELUAR PARKIR =================== */
         elseif ($aksi === 'keluar') {
 
-            // JIKA STATUS TERAKHIR BUKAN 'MASUK', TOLAK
             if ($status_terakhir !== 'masuk') {
                 $message = "Kendaraan tidak sedang terparkir.";
                 $message_type = "error";
@@ -148,32 +162,26 @@ if ($username !== '') {
                 $durasi = ceil(($keluar - $masuk) / 3600);
                 if ($durasi < 1) $durasi = 1;
 
-                $total = 0;
-                $id_tarif = 0;
+                /* SISTEM TARIF */
+
+                /* Note : Yup, walaupun kamu parkir 5 menit tetep bayar 2k, mungkin logikanya masih kurang rapi dan
+                        kurang standar, tapi apakah ini sesuai standar kapitalisme ekonomi masa ini?
+                        Yup, tentu saja */
 
                 if ($tipe === 'motor') {
                     $id_tarif = 1;
-                    if ($durasi <= 1) $total = 2000;
-                    elseif ($durasi < 24) $total = 2000 + (($durasi - 1) * 2000);
-                    elseif ($durasi == 24) $total = 15000;
-                    else $total = 15000 + (($durasi - 24) * 2000);
-                }
-                elseif ($tipe === 'mobil') {
+                    $total = ($durasi <= 1) ? 2000 : (($durasi < 24) ? 2000 + (($durasi - 1) * 2000) : 15000);
+                } elseif ($tipe === 'mobil') {
                     $id_tarif = 2;
-                    if ($durasi <= 1) $total = 5000;
-                    elseif ($durasi < 24) $total = 5000 + (($durasi - 1) * 3000);
-                    else $total = 20000;
-                }
-                else {
+                    $total = ($durasi <= 1) ? 5000 : (($durasi < 24) ? 5000 + (($durasi - 1) * 3000) : 20000);
+                } else {
                     $id_tarif = 3;
-                    if ($durasi <= 1) $total = 6000;
-                    elseif ($durasi < 24) $total = 6000 + (($durasi - 1) * 5000);
-                    else $total = 35000;
+                    $total = ($durasi <= 1) ? 6000 : (($durasi < 24) ? 6000 + (($durasi - 1) * 5000) : 35000);
                 }
 
                 $now = date('Y-m-d H:i:s');
 
-                // STATUS DISAMAKAN DENGAN DATABASE
+                /* UPDATE TRANSAKSI KELUAR */
                 $conn->query("
                     UPDATE tb_transaksi SET
                         waktu_keluar = '$now',
@@ -182,6 +190,14 @@ if ($username !== '') {
                         id_tarif = $id_tarif,
                         status = 'keluar'
                     WHERE id_parkir = {$parkir['id_parkir']}
+                ");
+
+                /* LOG AKTIVITAS KELUAR */
+                $aktivitas = "Keluar parkir - {$kendaraan['plat_nomor']} | Durasi {$durasi} jam | Total Rp " . number_format($total, 0, ',', '.');
+
+                $conn->query("
+                    INSERT INTO tb_log_aktivitas (id_user, aktivitas, waktu_aktivitas)
+                    VALUES ($id_user, '$aktivitas', NOW())
                 ");
 
                 $conn->query("
@@ -193,21 +209,19 @@ if ($username !== '') {
                 $message = "Kendaraan berhasil keluar parkir.";
                 $message_type = "success";
 
-                $qDetailArea = $conn->query("
-                SELECT nama_area
-                FROM tb_area_parkir
-                WHERE id_area = {$parkir['id_area']}");
-                $detail_area = $qDetailArea->fetch_assoc();
-
                 $data_tiket = [
-                    'mode' => 'KELUAR',
-                    'waktu_masuk' => $parkir['waktu_masuk'],
-                    'waktu_keluar' => $now,
-                    'durasi' => $durasi,
-                    'total' => $total,
-                    'kendaraan' => $kendaraan,
-                    'area' => $detail_area
+                'mode' => 'KELUAR',
+                'waktu_masuk'  => $parkir['waktu_masuk'],
+                'waktu_keluar' => $now,
+                'durasi'       => $durasi,
+                'total'        => $total,
+                'kendaraan'    => $kendaraan,
+                'area'         => ['nama_area' => $parkir['id_area']]
                 ];
+
+                if (empty($data_tiket) && isset($_SESSION['tiket_terakhir'])) {
+                    $data_tiket = $_SESSION['tiket_terakhir'];
+                }
             }
         }
     }
@@ -224,15 +238,11 @@ if ($username !== '') {
     <!-- CSS -->
     <link rel="stylesheet" href="desain_parkir.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
     
 </head>
@@ -280,6 +290,10 @@ if ($username !== '') {
 </div>
 
 <!-- Jam Digital -->
+
+    <!-- Note : Bagi yang enggak bisa baca jam analog, tidak ada diskriminasi. . .
+                Tapi ada baiknya kalau belajar lagi karena in my opinion, analog clock is underated -->
+
 <div class="current-time-display">Jam : <span id="current-time"></span>
 </div>
 </div>
@@ -300,7 +314,11 @@ if ($username !== '') {
 
         <!-- ================= HASIL TRANSAKSI ================= -->
     <?php if (!empty($data_tiket)): ?>
-        <div class="hasil-transaksi">
+        <div class="aksi-tiket" style="margin-top:15px;">
+            <button type="button" onclick="printTiket()" class="btn btn-primary"><i class="fa-solid fa-print"></i> Print Tiket</button>
+        </div>
+
+        <div class="hasil-transaksi" id="tiketParkir">
             <h3>Detail Transaksi</h3>
             <p><strong>Area Parkir:</strong> <?= $data_tiket['area']['nama_area'] ?? '-' ?></p>
             <p><strong>Nama:</strong> <?= $data_tiket['kendaraan']['nama_lengkap'] ?? '-' ?></p>
@@ -374,6 +392,34 @@ updateDigitalTime();
   positionClockNumbers();
   updateClock();
   setInterval(updateClock, 1000);
+</script>
+
+<!-- Print Tiket -->
+ <script>
+function printTiket() {
+    const tiket = document.getElementById("tiketParkir");
+
+    const printWindow = window.open('', '', 'width=400,height=600');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Tiket Parkir</title>
+            <style>
+                body { font-family: Arial; padding: 20px; }
+                h3 { text-align: center; }
+                p { font-size: 14px; margin: 6px 0; }
+            </style>
+        </head>
+        <body>
+            ${tiket.innerHTML}
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+}
 </script>
 
 </body>

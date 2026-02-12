@@ -1,9 +1,9 @@
 <?php
-include 'koneksi_parkir.php';
-
 $active_page = 'daftar_kendaraan';
 
-/* ===================== VAR ===================== */
+include 'koneksi_parkir.php';
+include 'proteksi_role_parkir.php';
+
 $message = $_GET['message'] ?? '';
 $message_type = $_GET['type'] ?? '';
 
@@ -319,7 +319,6 @@ document.getElementById('userSelect').addEventListener('change', function () {
 document.querySelectorAll('.btnEdit').forEach(btn => {
     btn.addEventListener('click', function () {
 
-        // Ambil data dari tombol
         const id      = this.dataset.id;
         const plat    = this.dataset.plat;
         const tipe    = this.dataset.tipe;
@@ -328,7 +327,6 @@ document.querySelectorAll('.btnEdit').forEach(btn => {
         const pemilik = this.dataset.pemilik;
         const userId  = this.dataset.user;
 
-        // Set ke form
         document.getElementById('form_action').value = 'edit';
         document.getElementById('id_kendaraan').value = id;
         document.querySelector('[name="plat_nomor"]').value = plat;
@@ -346,10 +344,8 @@ document.querySelectorAll('.btnEdit').forEach(btn => {
 
         document.getElementById('userSelect').dispatchEvent(new Event('change'));
 
-        // Ubah judul modal
         document.querySelector('.modal-title').innerText = 'Edit Kendaraan';
 
-        // Buka modal
         const modal = new bootstrap.Modal(document.getElementById('modalKendaraan'));
         modal.show();
     });
@@ -364,14 +360,14 @@ document.getElementById('searchBox').addEventListener('keyup', function () {
     const rows = document.querySelectorAll("table tr");
 
     rows.forEach((row, index) => {
-        if (index === 0) return; // skip header
+        if (index === 0) return; 
 
         let cellText = "";
 
         if (type === "jenis") {
-            cellText = row.cells[2].innerText.toLowerCase(); // kolom jenis
+            cellText = row.cells[2].innerText.toLowerCase(); 
         } else if (type === "pemilik") {
-            cellText = row.cells[4].innerText.toLowerCase(); // kolom pemilik
+            cellText = row.cells[4].innerText.toLowerCase();
         }
 
         row.style.display = cellText.includes(keyword) ? "" : "none";
@@ -380,7 +376,8 @@ document.getElementById('searchBox').addEventListener('keyup', function () {
 </script>    
 
 
-<!-- -->
+<!-- Searchbar atau Searchbox. . . Apa bedanya?
+    Searchbar itu bar tampilan untuk input, Searchbox untuk input apa yang di cara -->
 <script>
 const searchType = document.getElementById('searchType');
 const searchBox = document.getElementById('searchBox');

@@ -195,7 +195,7 @@ body.body-login .login-container button[type="submit"]:hover {
     color: inherit;
 }
 
-.sidebar {/* Tampilan sidebar utama */
+.sidebar { /* Tampilan sidebar utama */
     position: fixed;
     top: 0;
     width: var(--sidebar-width);
@@ -209,22 +209,13 @@ body.body-login .login-container button[type="submit"]:hover {
     flex-direction: column;
     z-index: 1000;
     transition: left 0.3s ease-in-out;
-    overflow-y: scroll; /* atau auto */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE dan Edge lama */
+    overflow-y: scroll;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 .sidebar::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, dan Opera */
-}
-
-#reader {
-    width: 100%;
-    max-width: 400px;
-    height: 300px;
-    margin: 20px auto;
-    border: 2px solid #cccccc00;
-    border-radius: 8px;
+    display: none;
 }
 
 .sidebar.active {
@@ -270,27 +261,9 @@ body.body-login .login-container button[type="submit"]:hover {
     text-decoration: none;
     padding: 12px 15px;
     border-radius: 8px;
-    transition: left 0.3s;
     font-size: 1.1em;
     font-weight: 500;
-}
-
-.sidebar-nav a:hover{
-    background-color: rgba(255,255,255,0.15);
-    color: #ffffff;
-    transform: translateX(5px);
-}
-
-.sidebar-nav a.active {
-    background-color: rgba(255,255,255,0.3); 
-    color: #ffffff;
-    transform: none; 
-}
-
-.submenu a.active {
-    background-color: rgba(255,255,255,0.3);
-    color: #ffffff;
-    transform: none;
+    transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .sidebar-nav a i {
@@ -300,15 +273,27 @@ body.body-login .login-container button[type="submit"]:hover {
     font-size: 1.2em;
 }
 
-.sidebar.hidden {
-    margin-left: -250px;
-    width: 0;
-    overflow: hidden;
-    padding: 0;
-    transition: all 0.3s ease;
+.sidebar-nav a:hover {
+    background-color: rgba(255,255,255,0.15);
+    color: #ffffff;
+    transform: translateX(5px);
 }
 
-.sidebar-toggle { /* Tombol pop-up garis 3, bukan biru */
+.sidebar .sidebar-nav a.active {
+    background-color: rgba(255,255,255,0.35) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    transform: none !important;
+    box-shadow: inset 4px 0 0 #ffffff;
+}
+
+.sidebar .submenu a.active {
+    background-color: rgba(255,255,255,0.35) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+.sidebar-toggle {
     display: block; 
     position: fixed;
     top: 20px;
@@ -323,29 +308,21 @@ body.body-login .login-container button[type="submit"]:hover {
     z-index: 1001;
 }
 
-.sidebar-toggle:hover { /* Warna transisi garis 3*/
-    color: #ffffff;
+.sidebar-toggle:hover {
     background-color: #80c2ff;
 }
 
-.sidebar-toggle.active { /* Tampilan untuk tombol garis 3 (aktif) */
-    left: 245px; 
-    transition: left 0.3s ease;
+.sidebar-toggle.active {
+    left: 245px;
     background-color: #80c2ff;
 }
 
-/*Toggle dalam sidebar (Menu dalam Menu) */
-
+/* Submenu logic */
 .submenu {
     display: none;
     padding-left: 20px;
     flex-direction: column;
     margin-top: 5px;
-    transition: all 0.3s ease;
-}
-
-.submenu li {
-    margin-bottom: 5px;
 }
 
 .submenu.show {
@@ -368,15 +345,21 @@ body.body-login .login-container button[type="submit"]:hover {
     transform: rotate(180deg);
 }
 
-.submenu .active {
-    background-color: rgba(255,255,255,0.3) !important;
-    color: #fff;
+.sidebar.active ~ .main-content {
+    margin-left: 250px;
+}
+
+.sidebar a.logout-menu {
+    color: #d1d1d1;
+}
+
+.sidebar a.logout-menu:hover {
+    background-color: rgba(255,255,255,0.35) ;
 }
 
 .main-content.full {
     margin-left: 0;
 }
-
 
 .main-content {
     flex-grow: 1;
@@ -388,10 +371,6 @@ body.body-login .login-container button[type="submit"]:hover {
 }
 
 .main-content.shifted {
-    margin-left: 250px;
-}
-
-.sidebar.active ~ .main-content {
     margin-left: 250px;
 }
 
@@ -451,18 +430,6 @@ body.body-login .login-container button[type="submit"]:hover {
     background-color:#e0f2f7;
     border-radius:8px;
     box-shadow:0 2px 5px rgba(0,0,0,0.05)
-}
-
-.absensi-type-group label {
-    display:inline-block;
-    margin-right:20px;
-    font-weight:normal
-}
-    
-.absensi-type-group input[type="radio"]{
-    width:auto;
-    margin-right:5px;
-    transform:scale(1.1)
 }
 
 /* Jam Analog*/
@@ -740,11 +707,9 @@ button[data-tooltip]:hover::before {
    ========================= */
 
 :root {
-    --hadir-color: #28a745;
-    --terlambat-color: #ff6600;
-    --izin-color: #ffc107;
-    --sakit-color: #dc3545;
-    --alpha-color: #6f42c1;
+    --masuk-color: #28a745;
+    --keluar-color: #ff6600;
+    --terparkir-color: #ffc107;
 }
 
 /* Ukuran dan layout canvas Chart */
@@ -835,28 +800,35 @@ button[data-tooltip]:hover::before {
 }
 
 .laporan-filter-form {
-    display: inline-block;
-    background: #f0f0f0;
-    padding: 15px 25px;
-    border-radius: 8px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(180px, 1fr));
+    gap: 16px;
+    align-items: end;
 }
 
 .laporan-filter-form .filter-group {
-    display: inline-block;
-    margin-right: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
 .laporan-filter-form .filter-group label {
-    font-weight: bold;
-    margin-right: 5px;
+    font-weight: 600;
+    margin-bottom: 6px;
 }
 
-.laporan-filter-form input[type="month"],
+.laporan-filter-form input[type="month"]{
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    margin-right: 20px;
+}
 .laporan-filter-form input[type="date"] {
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 6px;
 }
+
 
 
 h2, h3 {
@@ -1093,115 +1065,7 @@ hr {
     transform: translateY(-1px);
 }
 
-/* Menu pengganti Sidebar, Ribbon*/
-.ribbon-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(0, 0, 0, 0.4); /* Transparan hitam */
-    backdrop-filter: blur(4px);
-    padding: 10px 0;
-    display: flex;
-    justify-content: center;
-    z-index: 999;
-    transition: top 0.3s ease;
-}
-
-.ribbon-nav ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-}
-
-.ribbon-nav ul li {
-    margin: 0 15px;
-}
-
-.ribbon-nav ul li a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    padding: 8px 0;
-    display: inline-block;
-    border-bottom: 2px solid transparent;
-    transition: border-color 0.3s ease;
-}
-
-.ribbon-nav ul li a:hover {
-    border-bottom: 2px solid #ffffff;
-}
-
-.ribbon-nav .active {
-    border-bottom: 2px solid #ffffff;
-}
-
-.report-table-container {
-    overflow-x: auto; 
-    margin-top: 20px;
-    border: 1px solid #000;
-    border-radius: 0;
-    box-shadow: none;
-    max-width: 100%; 
-    background-color: #007bff;
-}
-.report-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #ffffff;
-}
-.report-table th, .report-table td {
-    border: 1px solid #e0e0e0;
-    padding: 8px 12px;
-    text-align: center;
-    vertical-align: middle;
-    white-space: nowrap;
-    color: #000;
-}
-.report-table thead th {
-    background-color: #7e7e7e;
-    color: #ffffff;
-    font-weight: bold;
-    text-transform: uppercase;
-    font-size: 0.95em;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.report-table thead tr:nth-child(2) th {
-    top: 30px; 
-    z-index: 20;
-    background-color: #7c7c7c; 
-}
-
-
-.report-table th.fixed-col-name,
-.report-table td.fixed-col-name {
-    position: sticky;
-    left: 0;
-    z-index: 30; 
-    text-align: left; 
-    min-width: 100px; 
-    max-width: 250px; 
-    overflow: hidden;
-    text-overflow: ellipsis; 
-    box-shadow: 2px 0 3px rgba(0,0,0,0.1); 
-}
-.report-table th.fixed-col-nis,
-.report-table td.fixed-col-nis {
-    position: sticky;
-    left: 150px; 
-    z-index: 30;
-    text-align: left; 
-    width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    box-shadow: 2px 0 3px rgba(0, 0, 0, 0); 
-}
-
-.print-button { /* Tombol Print Absensi*/
+.print-button { /* Tombol Print */
     background-color: #17a2b8;
     color: white;
     padding: 12px 20px;
@@ -1231,18 +1095,6 @@ hr {
 #exportToExcelBtn:hover {
     background-color: #0c7939;
     transform: translateY(-1px);
-}
-
-.holiday-cell {
-    background-color: rgb(240, 128, 128); /* Warna hari libur */
-    color: #000000; 
-    font-weight: bold;
-}
-
-.future-date-cell {
-    background-color: #ffffff; /* Table laporan absensi untuk hari yang akan datang */
-    color: #6c757d; 
-    font-style: italic;
 }
 
 .report-summary-cards {

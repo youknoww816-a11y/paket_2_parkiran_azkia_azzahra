@@ -1,7 +1,8 @@
 <?php
-include 'koneksi_parkir.php';
-// include 'proteksi_user_parkir.php';
 $active_page = 'dashboard_parkiran';
+
+include 'koneksi_parkir.php';
+include 'proteksi_role_parkir.php';
 
 date_default_timezone_set('Asia/Jakarta');
 $tanggal_hari_ini = date('Y-m-d');
@@ -26,10 +27,6 @@ $tanggal_hari_ini = date('Y-m-d');
 //    $menu_mode_global = $_COOKIE['menu_mode'];
 //}
 
-
-/* =======================
-   INISIALISASI
-======================= */
 $total_kendaraan = 0;
 
 $total_motor_terparkir = 0;
@@ -49,9 +46,6 @@ $data_chart = [
 $message = '';
 $message_type = '';
 
-/* =======================
-   QUERY DATABASE
-======================= */
 if ($conn && !$conn->connect_error) {
 
     /* TOTAL KENDARAAN TERDAFTAR */
@@ -148,7 +142,6 @@ $chart_data_json = json_encode($data_chart);
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
@@ -213,38 +206,78 @@ $chart_data_json = json_encode($data_chart);
 </div>
 </section>
 
+<div class="empty-space"></div>
+
 <section class="chart-section">
 <h3>Status Parkir Hari Ini</h3>
 
-<div class="chart-container">
-    <canvas id="statusParkirChart"></canvas>
-</div>
+<div class="chart-container"><canvas id="attendanceChart"></canvas></div>
 </section>
 
 </main>
 </div>
 
+<!-- Untuk data chartbar -->
 <script>
-const chartData = <?= $chart_data_json ?>;
+    window.chartData = [
+        <?= $data_chart['masuk'] ?>,
+        <?= $data_chart['keluar'] ?>,
+        <?= $data_chart['masih_parkir'] ?>
+    ];
 
-new Chart(document.getElementById('statusParkirChart'), {
-    type: 'bar',
-    data: {
-        labels: ['Masuk Hari Ini', 'Keluar Hari Ini', 'Masih Terparkir'],
-        datasets: [{
-            label: 'Jumlah Kendaraan',
-            data: [
-                chartData.masuk,
-                chartData.keluar,
-                chartData.masih_parkir
-            ],
-            backgroundColor: ['#2196F3', '#F44336', '#4CAF50']
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
+    window.totalDataDicatat = <?= 
+        $data_chart['masuk'] +
+        $data_chart['keluar'] +
+        $data_chart['masih_parkir']
+    ?>;
+</script>
+
+<!-- Ini untuk tampilan chartbar agar bisa diatur di css -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const chartData = window.chartData || [0, 0, 0];
+    const totalDataDicatat = window.totalDataDicatat || 0;
+
+    if (totalDataDicatat > 0) {
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+
+        const rootStyle = getComputedStyle(document.documentElement);
+        const colors = [
+            rootStyle.getPropertyValue('--masuk-color').trim(),
+            rootStyle.getPropertyValue('--keluar-color').trim(),
+            rootStyle.getPropertyValue('--terparkir-color').trim()
+        ];
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'Masuk Hari Ini',
+                    'Keluar Hari Ini',
+                    'Masih Terparkir'
+                ],
+                datasets: [{
+                    label: 'Jumlah Kendaraan',
+                    data: chartData,
+                    backgroundColor: colors,
+                    borderColor: colors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    }
+                }
+            }
+        });
     }
+
 });
 </script>
 
