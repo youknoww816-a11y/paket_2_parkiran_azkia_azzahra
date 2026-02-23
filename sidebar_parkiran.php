@@ -82,6 +82,12 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                 </a>
             </li>
 
+            <li>
+                <a href="log_aktivitas_parkiran.php"class="<?= ($current_page === 'log_aktivitas_parkiran') ? 'active' : '' ?>">
+                    <i class="fa-regular fa-calendar-days"></i> Log Parkiran
+                </a>
+            </li>
+
         <?php endif; ?>
 
         <!-- Semua User -->

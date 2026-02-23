@@ -21,7 +21,8 @@ if ($_SESSION['role'] === 'admin') {
         'tambah_user_parkir.php',
         'daftar_kendaraan.php',
         'area_parkir.php',
-        'log_aktivitas_parkiran.php'
+        'log_aktivitas_parkiran.php',
+        'tampilan_parkir.php'
     ];
 }
 
@@ -36,7 +37,8 @@ elseif ($_SESSION['role'] === 'petugas') {
 // Akses untuk user 'owner' 
 elseif ($_SESSION['role'] === 'owner') {
     $allowed = [
-        'rekap_transaksi_parkir.php'
+        'rekap_transaksi_parkir.php',
+        'log_aktivitas_parkiran.php'
     ];
 }
 

@@ -7,31 +7,12 @@ include 'proteksi_role_parkir.php';
 date_default_timezone_set('Asia/Jakarta');
 $tanggal_hari_ini = date('Y-m-d');
 
-
-// Note : ini enggak bakal dihapus dulu, siapa tau disuruh ngebuat tema, untuk sementara jadi placeholder
-//$query = $conn->query("SELECT tema, tampilan_menu, running_text_dashboard, kecepatan_running_text_dashboard FROM tb_tampilan LIMIT 1");
-//if ($row = $query->fetch_assoc()) {
-//$tema_global = $row['tema'];
-//$menu_mode_global = $row['tampilan_menu'];
-//$running_text_dashboard = $row['running_text_dashboard'];
-//$kecepatan_dashboard = is_numeric($row['kecepatan_running_text_dashboard']) ? (float)$row['kecepatan_running_text_dashboard'] : 15;
-//} else {
-//    $tema_global = 'normal';
-//    $menu_mode_global = 'sidebar';
-//    $running_text_dashboard = 'Selamat datang di Dashboard'; // default jika kosong
-//}
-//if (isset($_COOKIE['theme'])) {
-//    $tema_global = $_COOKIE['theme'];
-//}
-//if (isset($_COOKIE['menu_mode'])) {
-//    $menu_mode_global = $_COOKIE['menu_mode'];
-//}
-
 $total_kendaraan = 0;
 
 $total_motor_terparkir = 0;
 $total_mobil_terparkir = 0;
 $total_lainnya_terparkir = 0;
+$total_kendaraan_tidak_terdaftar = 0;
 $total_semua_kendaraan_terparkir = 0;
 
 $total_kendaraan_masuk_hari_ini = 0;
@@ -48,7 +29,9 @@ $message_type = '';
 
 if ($conn && !$conn->connect_error) {
 
-    /* TOTAL KENDARAAN TERDAFTAR */
+    /* ============================
+       TOTAL KENDARAAN TERDAFTAR
+       ============================ */
     $res = $conn->query("SELECT COUNT(*) AS total FROM tb_kendaraan");
     if ($res) {
         $total_kendaraan = (int)$res->fetch_assoc()['total'];
@@ -56,22 +39,25 @@ if ($conn && !$conn->connect_error) {
 
     /* ============================
        KENDARAAN MASIH TERPARKIR
-       (STATUS = 'masuk', SEMUA HARI)
+       TERMASUK GUEST (INPUT PLAT NOMOR)
+       SUMBER: tb_transaksi + tb_area_parkir
        ============================ */
+
     $sql = "
-        SELECT k.jenis_kendaraan, COUNT(*) AS jumlah
+        SELECT a.tipe_kendaraan, COUNT(*) AS jumlah
         FROM tb_transaksi tr
-        JOIN tb_kendaraan k ON tr.id_kendaraan = k.id_kendaraan
+        JOIN tb_area_parkir a ON tr.id_area = a.id_area
         WHERE tr.status = 'masuk'
-        GROUP BY k.jenis_kendaraan
-    ";
+        AND tr.id_kendaraan IS NOT NULL
+        GROUP BY a.tipe_kendaraan
+        ";
 
     $res = $conn->query($sql);
     if ($res) {
         while ($row = $res->fetch_assoc()) {
-            if ($row['jenis_kendaraan'] === 'motor') {
+            if ($row['tipe_kendaraan'] === 'motor') {
                 $total_motor_terparkir = (int)$row['jumlah'];
-            } elseif ($row['jenis_kendaraan'] === 'mobil') {
+            } elseif ($row['tipe_kendaraan'] === 'mobil') {
                 $total_mobil_terparkir = (int)$row['jumlah'];
             } else {
                 $total_lainnya_terparkir = (int)$row['jumlah'];
@@ -79,15 +65,27 @@ if ($conn && !$conn->connect_error) {
         }
     }
 
+    $res = $conn->query("
+        SELECT COUNT(*) AS total
+        FROM tb_transaksi
+        WHERE status = 'masuk'
+        AND id_kendaraan IS NULL
+    ");
+
+    if ($res) {
+        $total_kendaraan_tidak_terdaftar = (int)$res->fetch_assoc()['total'];
+    }
+
     $total_semua_kendaraan_terparkir =
         $total_motor_terparkir +
         $total_mobil_terparkir +
-        $total_lainnya_terparkir;
+        $total_lainnya_terparkir +
+        $total_kendaraan_tidak_terdaftar;
+
 
     /* ============================
        KENDARAAN MASUK HARI INI
        ============================ */
-       
     $stmt = $conn->prepare("
         SELECT COUNT(*) 
         FROM tb_transaksi 
@@ -103,7 +101,6 @@ if ($conn && !$conn->connect_error) {
     /* ============================
        KENDARAAN KELUAR HARI INI
        ============================ */
-       
     $stmt = $conn->prepare("
         SELECT COUNT(*) 
         FROM tb_transaksi 
@@ -183,6 +180,12 @@ $chart_data_json = json_encode($data_chart);
         <i class="fas fa-truck"></i>
         <h4>Kendaraan Lainnya</h4>
         <p><?= $total_lainnya_terparkir ?></p>
+    </div>
+
+    <div class="dashboard-card">
+        <i class="fa-solid fa-user-xmark"></i>
+        <h4>Kendaraan Tidak Terdaftar</h4>
+        <p><?= $total_kendaraan_tidak_terdaftar ?></p>
     </div>
 
     <div class="dashboard-card">

@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         header("Location: transaksi_parkir.php");
                     }
                     elseif ($user['role'] === 'owner') {
-                        header("Location: rekap_transaksi_parkir.php");
+                        header("Location: log_aktivitas_parkiran.php");
                     }
                     else {
                         session_destroy();

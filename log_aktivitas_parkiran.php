@@ -45,20 +45,23 @@ if (!empty($_GET['start_date']) && !empty($_GET['end_date'])) {
 $sql = "
 SELECT
     t.id_parkir,
+    t.id_kendaraan,
     t.waktu_masuk,
     t.waktu_keluar,
     t.status,
     t.durasi_jam,
     t.biaya_total,
 
-    u.username,
-    u.nama_lengkap,
+    COALESCE(u.username, 'Guest') AS username,
+    COALESCE(u.nama_lengkap, 'Non-user') AS nama_lengkap,
 
-    k.plat_nomor,
-    k.tipe_kendaraan,
-    k.jenis_kendaraan,
-    k.warna,
-    k.pemilik,
+    -- Ambil plat nomor dari kendaraan atau input manual
+    COALESCE(k.plat_nomor, t.plat_nomor, t.plat_nomor_tamu) AS plat_nomor,
+
+    COALESCE(k.tipe_kendaraan, 'Manual Input') AS tipe_kendaraan,
+    COALESCE(k.jenis_kendaraan, 'Manual Input') AS jenis_kendaraan,
+    COALESCE(k.warna, '-') AS warna,
+    COALESCE(k.pemilik, '-') AS pemilik,
 
     a.nama_area,
 
@@ -79,11 +82,13 @@ SELECT
                 DATE_FORMAT(t.waktu_keluar, '%d %b %Y %H:%i')
             )
     END AS aktivitas
+
 FROM tb_transaksi t
-JOIN tb_kendaraan k ON t.id_kendaraan = k.id_kendaraan
-JOIN tb_user u ON t.id_user = u.id_user
-JOIN tb_area_parkir a ON t.id_area = a.id_area
+LEFT JOIN tb_kendaraan k ON t.id_kendaraan = k.id_kendaraan
+LEFT JOIN tb_user u ON t.id_user = u.id_user
+LEFT JOIN tb_area_parkir a ON t.id_area = a.id_area
 LEFT JOIN tb_tarif tr ON t.id_tarif = tr.id_tarif
+
 WHERE t.waktu_masuk BETWEEN ? AND ?
 ORDER BY t.waktu_masuk DESC
 ";
@@ -220,9 +225,14 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
                 <button data-sort="mobil">Kendaraan Mobil</button>
                 <button data-sort="motor">Kendaraan Motor</button>
                 <button data-sort="lainnya">Kendaraan Lainnya</button>
+                <button data-sort="manual">Kendaraan Tidak Terdaftar</button>
                 <button data-sort="">Tanggal Terlama</button>
             </div>
         </div>
+
+        <button id="btnExportExcel" data-tooltip="Ekspor ke Excel"><i class="fa-solid fa-file-excel"></i></button>
+        
+        <button id="btnExportPDF" data-tooltip="Download PDF"><i class="fa-solid fa-file-pdf"></i></button>
         
         <div class="search-wrapper">
             <select id="searchType">
@@ -244,7 +254,7 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
         
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table id="tabelLogParkir" class="table table-hover align-middle">
                     <thead>
                         <tr>
                             <th>Username</th>
@@ -277,13 +287,14 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
         }
         ?>
 
+         <?php $isManual = empty($row['id_kendaraan']); ?>
         <tr>
-            <td><?= htmlspecialchars($row['username']) ?></td>
-            <td><?= htmlspecialchars($row['pemilik']) ?></td>
-            <td><?= htmlspecialchars($row['tipe_kendaraan']) ?></td>
-            <td><?= htmlspecialchars($row['jenis_kendaraan']) ?></td>
+            <td><?= $isManual ? '-' : htmlspecialchars($row['username']) ?></td>
+            <td><?= $isManual ? '-' : htmlspecialchars($row['pemilik']) ?></td>
+            <td><?= $isManual ? 'Manual' : htmlspecialchars($row['tipe_kendaraan']) ?></td>
+            <td><?= $isManual ? '-' : htmlspecialchars($row['jenis_kendaraan']) ?></td>
             <td><?= htmlspecialchars($row['plat_nomor']) ?></td>
-            <td><?= htmlspecialchars($row['warna']) ?></td>
+            <td><?= $isManual ? '-' : htmlspecialchars($row['warna']) ?></td>
 
             <!-- Status panjang -->
             <td><?= htmlspecialchars($row['aktivitas']) ?></td>
@@ -305,16 +316,37 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
         </tr>
 
     <?php endwhile; ?>
-<?php else: ?>
-    <tr>
-        <td colspan="10" class="text-center text-muted">
-            Tidak ada data aktivitas pada periode ini
-        </td>
-    </tr>
-<?php endif; ?>
+
+    <?php else: ?>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="text-center text-muted">
+                Tidak ada data aktivitas pada periode ini
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    <?php endif; ?>
 
                     </tbody>
                 </table>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 
 <!-- Toolbar agar bisa bekerja -->
 <script>
@@ -330,12 +362,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const startDate   = document.getElementById('start_date');
     const endDate     = document.getElementById('end_date');
 
-    const tbody = document.querySelector("tbody");
+    const tbody = document.querySelector("#tabelLogParkir tbody");
     let rows    = Array.from(tbody.querySelectorAll("tr"));
 
     const originalRows = rows.map(row => row.cloneNode(true));
 
-/* ===================== Searchbox? Searchbar? taulah ya  ====================== */
+/* ===================== SEARCH ====================== */
 
     searchBox.addEventListener('keyup', function () {
         const keyword = this.value.toLowerCase();
@@ -364,7 +396,7 @@ document.addEventListener('DOMContentLoaded', function () {
         searchBox.focus();
     });
 
-/* ===================== Soltir ====================== */
+/* ===================== SORT / FILTER ====================== */
 
     document.querySelectorAll('#filterMenu button').forEach(btn => {
         btn.addEventListener('click', function () {
@@ -372,9 +404,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             rows.forEach(row => {
                 const tipe = row.cells[2].innerText.toLowerCase();
+                
+                if (filter === "manual") {
+                    row.style.display = (tipe === "manual") ? "" : "none";
 
-                if (!filter || tipe === filter) {
+                } else if (filter === "mobil" || filter === "motor" || filter === "lainnya") {
+                    row.style.display = (tipe === filter) ? "" : "none";
+
+                } else if (!filter) {
                     row.style.display = "";
+
                 } else {
                     row.style.display = "none";
                 }
@@ -393,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-/* ===================== Toggle menu sortir ====================== */
+/* ===================== TOGGLE MENU ====================== */
 
     btnFilter.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -408,26 +447,73 @@ document.addEventListener('DOMContentLoaded', function () {
         e.stopPropagation();
     });
 
-/* ===================== Reset fiter tanggal, sortir, dan cari ====================== */
+/* ===================== RESET ====================== */
     
     btnReset.addEventListener('click', function () {
 
-        /* Reset tanggal */
         monthInput.value = "";
         startDate.value  = "";
         endDate.value    = "";
 
-        /* Reset search */
         searchBox.value = "";
         searchType.value = "jenis";
 
-        /* Reset table */
         tbody.innerHTML = "";
         originalRows.forEach(row => tbody.appendChild(row.cloneNode(true)));
 
         rows = Array.from(tbody.querySelectorAll("tr"));
 
         filterMenu.classList.add('hidden');
+    });
+
+});
+</script>
+
+<script>
+$(document).ready(function(){
+
+    var table = $('#tabelLogParkir').DataTable({
+        paging: false,
+        dom: 'lrt',
+        order: [[0, 'asc']],
+        retrieve: true
+    });
+
+    new $.fn.dataTable.Buttons(table, {
+    buttons: [
+        {
+            extend: 'excelHtml5',
+            title: 'Log Aktivitas Parkiran',
+            exportOptions: {
+                columns: ':visible',
+                rows: function (idx, data, node) {
+                    return $(node).css('display') !== 'none';
+                }
+            }
+        },
+        {
+            extend: 'pdfHtml5',
+            title: 'Log Aktivitas Parkiran',
+            orientation: 'landscape',
+            pageSize: 'A4',
+            exportOptions: {
+                columns: ':visible',
+                rows: function (idx, data, node) {
+                    return $(node).css('display') !== 'none';
+                }
+            }
+        }
+    ]
+});
+
+    table.buttons().container().appendTo('#hiddenButtons');
+
+    $('#btnExportExcel').on('click', function(){
+        table.button('.buttons-excel').trigger();
+    });
+
+    $('#btnExportPDF').on('click', function(){
+        table.button('.buttons-pdf').trigger();
     });
 
 });

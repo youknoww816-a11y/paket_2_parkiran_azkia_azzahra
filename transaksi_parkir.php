@@ -11,220 +11,366 @@ $message = '';
 $message_type = '';
 
 $data_tiket = null;
-$_SESSION['tiket_terakhir'] = $data_tiket;
 $status_terakhir = null;
 
-$aksi = $_POST['aksi'] ?? null;
-$username = trim($_POST['username'] ?? '');
-
 /* ===============================
-   AMBIL USER + KENDARAAN
+   PROSES KELUAR PARKIR (FINAL FIX)
    =============================== */
 
-/* Note: Aturan parkir aku itu 1 kendaraan = 1 user
-        Iya, mungkin tidak praktis, iya tidak realistis karena kalau kamu parkir kamu cukup menekan 1 tombol selesai,
-        tapi apakah sesuai dengan format ujikom?
-        harusnya iya walaupun tidak realistis dan praktis */
+if (isset($_GET['keluar'])) {
 
-if ($username !== '') {
+    $id_parkir = (int)$_GET['keluar'];
 
-    $stmt = $conn->prepare("
+    // 🔥 LEFT JOIN supaya guest tetap kebaca
+    $qKeluar = $conn->query("
         SELECT 
-            k.id_kendaraan,
-            k.plat_nomor,
-            k.tipe_kendaraan,
+            t.*,
+            k.plat_nomor AS plat_kendaraan,
             k.jenis_kendaraan,
-            k.warna,
-            u.id_user,
+            k.tipe_kendaraan,
             u.nama_lengkap,
-            u.username
-        FROM tb_kendaraan k
-        JOIN tb_user u ON k.id_user = u.id_user
-        WHERE u.username = ?
+            u.username,
+            a.nama_area
+        FROM tb_transaksi t
+        LEFT JOIN tb_kendaraan k ON t.id_kendaraan = k.id_kendaraan
+        LEFT JOIN tb_user u ON t.id_user = u.id_user
+        LEFT JOIN tb_area_parkir a ON t.id_area = a.id_area
+        WHERE t.id_parkir = $id_parkir
+        AND t.status = 'masuk'
         LIMIT 1
     ");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $q = $stmt->get_result();
 
-    if ($q->num_rows == 0) {
-        $message = "User atau kendaraan tidak ditemukan.";
-        $message_type = "error";
-    } else {
+    if ($qKeluar->num_rows > 0) {
 
-        $kendaraan = $q->fetch_assoc();
-        $id_kendaraan = $kendaraan['id_kendaraan'];
-        $id_user      = $kendaraan['id_user'];
-        $tipe         = strtolower($kendaraan['tipe_kendaraan']);
-        $username_db  = $kendaraan['username'];
+        $trx = $qKeluar->fetch_assoc();
+
+        $waktu_masuk  = strtotime($trx['waktu_masuk']);
+        $waktu_keluar = time();
+
+        $durasi = ceil(($waktu_keluar - $waktu_masuk) / 3600);
+        if ($durasi < 1) $durasi = 1;
 
         /* ===============================
-           CEK TRANSAKSI TERAKHIR
+           AMBIL TARIF
            =============================== */
-        $cek = $conn->query("
-            SELECT *
-            FROM tb_transaksi
-            WHERE id_kendaraan = $id_kendaraan
-            ORDER BY id_parkir DESC
+
+        $tipe = $trx['tipe_kendaraan'] ?? 'motor';
+
+        $qTarif = $conn->query("
+            SELECT id_tarif, tarif_per_jam
+            FROM tb_tarif
+            WHERE jenis_kendaraan = '$tipe'
             LIMIT 1
         ");
 
-        $parkir = $cek->fetch_assoc();
-        $status_terakhir = $parkir['status'] ?? null;
+        $tarif = $qTarif->fetch_assoc();
 
-        /* =================== MASUK PARKIR =================== */
-        if ($aksi === 'masuk') {
+        $id_tarif = $tarif['id_tarif'];
+        $tarif_per_jam = $tarif['tarif_per_jam'];
 
+        $total = $durasi * $tarif_per_jam;
+
+        $now = date('Y-m-d H:i:s');
+
+        /* ===============================
+           UPDATE TRANSAKSI
+           =============================== */
+
+        $conn->query("
+            UPDATE tb_transaksi
+            SET
+                waktu_keluar = '$now',
+                id_tarif = $id_tarif,
+                durasi_jam = $durasi,
+                biaya_total = $total,
+                status = 'keluar'
+            WHERE id_parkir = $id_parkir
+        ");
+
+        /* ===============================
+            LOG AKTIVITAS KELUAR
+        =============================== */
+        
+        $aktivitas_keluar = "Keluar parkir - " .
+        ($trx['plat_kendaraan'] ?? $trx['plat_nomor']) .
+        " dari area " . $trx['nama_area'];
+        
+        $conn->query("
+            INSERT INTO tb_log_aktivitas (
+            id_user,
+            aktivitas,
+            waktu_aktivitas
+        ) VALUES (
+        " . ($trx['id_user'] ?: "NULL") . ",
+            '$aktivitas_keluar',
+            '$now'
+        )
+        ");
+
+        /* ===============================
+           UPDATE AREA
+           =============================== */
+
+        $conn->query("
+            UPDATE tb_area_parkir
+            SET terisi = terisi - 1
+            WHERE id_area = {$trx['id_area']}
+        ");
+
+        /* ===============================
+           DATA TIKET
+           =============================== */
+
+        $data_tiket = [
+            'mode' => 'KELUAR',
+            'waktu_masuk' => $trx['waktu_masuk'],
+            'waktu_keluar' => $now,
+            'durasi' => $durasi,
+            'total' => $total,
+            'kendaraan' => [
+                'plat_nomor' => $trx['plat_kendaraan'] ?? $trx['plat_nomor'],
+                'nama_lengkap' => $trx['nama_lengkap'] ?? 'Pengunjung',
+                'username' => $trx['username'] ?? '-',
+                'jenis_kendaraan' => $trx['jenis_kendaraan'] ?? '-',
+                'tipe_kendaraan' => $trx['tipe_kendaraan'] ?? '-'
+            ],
+            'area' => [
+                'nama_area' => $trx['nama_area']
+            ]
+        ];
+
+        $_SESSION['tiket_terakhir'] = $data_tiket;
+
+        $message = "Kendaraan berhasil keluar parkir.";
+        $message_type = "success";
+    }
+}
+
+/* ===============================
+   AMBIL USER UNTUK DROPDOWN
+   =============================== */
+
+$users_dropdown = $conn->query("
+    SELECT  
+        u.username,
+        u.nama_lengkap,
+        k.plat_nomor,
+        k.id_kendaraan,
+        (
+            SELECT status
+            FROM tb_transaksi t
+            WHERE t.id_kendaraan = k.id_kendaraan
+            ORDER BY id_parkir DESC
+            LIMIT 1
+        ) AS status_parkir
+    FROM tb_user u
+    JOIN tb_kendaraan k ON k.id_user = u.id_user
+    ORDER BY u.nama_lengkap ASC
+");
+
+/* ===============================
+   INPUT USERNAME ATAU PLAT
+   =============================== */
+
+$username = trim($_POST['username'] ?? '');
+$plat     = strtoupper(trim($_POST['plat_nomor'] ?? ''));
+
+$kendaraan = null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($username !== '' || $plat !== '')) {
+
+    if ($username !== '') {
+
+        $stmt = $conn->prepare("
+            SELECT k.*, u.id_user, u.nama_lengkap
+            FROM tb_user u
+            LEFT JOIN tb_kendaraan k ON k.id_user = u.id_user
+            WHERE u.username = ?
+            LIMIT 1
+        ");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $q = $stmt->get_result();
+
+        if ($q->num_rows > 0) {
+            $kendaraan = $q->fetch_assoc();
+        } else {
+            $message = "Username tidak ditemukan.";
+            $message_type = "error";
+        }
+
+    } else {
+
+        $stmt = $conn->prepare("
+            SELECT k.*, u.id_user, u.nama_lengkap
+            FROM tb_kendaraan k
+            LEFT JOIN tb_user u ON k.id_user = u.id_user
+            WHERE k.plat_nomor = ?
+            LIMIT 1
+        ");
+        $stmt->bind_param("s", $plat);
+        $stmt->execute();
+        $q = $stmt->get_result();
+
+        if ($q->num_rows > 0) {
+            $kendaraan = $q->fetch_assoc();
+        } else {
+
+            $kendaraan = [
+                'id_kendaraan'   => null,
+                'id_user'        => null,
+                'plat_nomor'     => $plat,
+                'jenis_kendaraan'=> 'motor',
+                'tipe_kendaraan' => 'umum',
+                'nama_lengkap'   => 'Pengunjung'
+            ];
+        }
+    }
+
+    if (!empty($kendaraan)) {
+
+        $id_kendaraan = (int)($kendaraan['id_kendaraan'] ?? 0);
+        $id_user      = (int)($kendaraan['id_user'] ?? 0);
+        $plat_db      = $kendaraan['plat_nomor'] ?: $plat;
+
+        $status_terakhir = null;
+        if ($id_kendaraan > 0) {
+            
+            $cek = $conn->query("
+                SELECT status
+                FROM tb_transaksi
+                WHERE id_kendaraan = $id_kendaraan
+                ORDER BY id_parkir DESC
+                LIMIT 1
+            ");
+            
+            $parkir = $cek->fetch_assoc();
+            $status_terakhir = $parkir['status'] ?? null;
+            
             if ($status_terakhir === 'masuk') {
-                $message = "Kendaraan masih terparkir dan belum keluar.";
+                $message = "Kendaraan masih terparkir (belum keluar).";
                 $message_type = "error";
-            } else {
-
-                $qArea = $conn->query("
-                    SELECT id_area, nama_area
-                    FROM tb_area_parkir
-                    WHERE tipe_kendaraan = '$tipe'
-                    AND status_area_parkir = 'tempat kosong masih tersedia'
-                    AND terisi < kapasitas
-                    ORDER BY id_area ASC
-                    LIMIT 1
-                ");
-
-                if ($qArea->num_rows == 0) {
-                    $message = "Area parkir untuk kendaraan ini penuh.";
-                    $message_type = "error";
-                } else {
-
-                    $area = $qArea->fetch_assoc();
-                    $id_area = $area['id_area'];
-                    $nama_area = $area['nama_area'];
-                    $now = date('Y-m-d H:i:s');
-
-                    /* INSERT TRANSAKSI MASUK */
-                    $conn->query("
-                        INSERT INTO tb_transaksi (
-                            id_kendaraan,
-                            waktu_masuk,
-                            status,
-                            id_user,
-                            id_area
-                        ) VALUES (
-                            $id_kendaraan,
-                            '$now',
-                            'masuk',
-                            $id_user,
-                            $id_area
-                        )
-                    ");
-
-                /* LOG AKTIVITAS MASUK */
-
-                /* Note: Aku itu baru ngebuat logika itu diakhir, makanya di log_aktivitas_parkir sama
-                        rekap_transaksi_parkir itu pake tb_transaksi, bukan tb_log-aktivitas */  
-
-                    $aktivitas = "Masuk parkir - {$kendaraan['plat_nomor']} ({$kendaraan['jenis_kendaraan']}) di area $nama_area";
-
-                    $conn->query("
-                        INSERT INTO tb_log_aktivitas (id_user, aktivitas, waktu_aktivitas)
-                        VALUES ($id_user, '$aktivitas', NOW())
-                    ");
-
-                    $conn->query("
-                        UPDATE tb_area_parkir 
-                        SET terisi = terisi + 1
-                        WHERE id_area = $id_area
-                    ");
-
-                    $message = "Kendaraan berhasil masuk parkir.";
-                    $message_type = "success";
-
-                    $data_tiket = [
-                        'mode' => 'MASUK',
-                        'waktu_masuk' => $now,
-                        'kendaraan' => $kendaraan,
-                        'area' => ['nama_area' => $nama_area]
-                    ];
-                }
             }
         }
 
-        /* =================== KELUAR PARKIR =================== */
-        elseif ($aksi === 'keluar') {
+        if ($message === '') {
 
-            if ($status_terakhir !== 'masuk') {
-                $message = "Kendaraan tidak sedang terparkir.";
+            $qArea = $conn->query("
+                SELECT id_area, nama_area
+                FROM tb_area_parkir
+                WHERE terisi < kapasitas
+                LIMIT 1
+            ");
+
+            if ($qArea->num_rows == 0) {
+
+                $message = "Area parkir penuh.";
                 $message_type = "error";
+
             } else {
 
-                $masuk  = strtotime($parkir['waktu_masuk']);
-                $keluar = time();
+                $area = $qArea->fetch_assoc();
 
-                $durasi = ceil(($keluar - $masuk) / 3600);
-                if ($durasi < 1) $durasi = 1;
+                $id_area   = (int)$area['id_area'];
+                $nama_area = $area['nama_area'];
+                $now       = date('Y-m-d H:i:s');
 
-                /* SISTEM TARIF */
-
-                /* Note : Yup, walaupun kamu parkir 5 menit tetep bayar 2k, mungkin logikanya masih kurang rapi dan
-                        kurang standar, tapi apakah ini sesuai standar kapitalisme ekonomi masa ini?
-                        Yup, tentu saja */
-
-                if ($tipe === 'motor') {
-                    $id_tarif = 1;
-                    $total = ($durasi <= 1) ? 2000 : (($durasi < 24) ? 2000 + (($durasi - 1) * 2000) : 15000);
-                } elseif ($tipe === 'mobil') {
-                    $id_tarif = 2;
-                    $total = ($durasi <= 1) ? 5000 : (($durasi < 24) ? 5000 + (($durasi - 1) * 3000) : 20000);
-                } else {
-                    $id_tarif = 3;
-                    $total = ($durasi <= 1) ? 6000 : (($durasi < 24) ? 6000 + (($durasi - 1) * 5000) : 35000);
+            /* ===============================
+                INSERT TRANSAKSI MASUK 
+               =============================== */
+               
+               $stmtInsert = $conn->prepare("
+                    INSERT INTO tb_transaksi (
+                    id_kendaraan,
+                    plat_nomor,
+                    waktu_masuk,
+                    status,
+                    id_user,
+                    id_area
+                ) VALUES (?, ?, ?, 'masuk', ?, ?)
+                ");
+                
+                $idK = $id_kendaraan ?: null;
+                $idU = $id_user ?: null;
+                
+                $stmtInsert->bind_param(
+                    "issii",
+                    $idK,
+                    $plat_db,
+                    $now,
+                    $idU,
+                    $id_area
+                );
+                
+                if (!$stmtInsert->execute()) {
+                    die("Gagal menyimpan transaksi masuk: " . $stmtInsert->error);
                 }
 
-                $now = date('Y-m-d H:i:s');
-
-                /* UPDATE TRANSAKSI KELUAR */
-                $conn->query("
-                    UPDATE tb_transaksi SET
-                        waktu_keluar = '$now',
-                        durasi_jam = $durasi,
-                        biaya_total = $total,
-                        id_tarif = $id_tarif,
-                        status = 'keluar'
-                    WHERE id_parkir = {$parkir['id_parkir']}
-                ");
-
-                /* LOG AKTIVITAS KELUAR */
-                $aktivitas = "Keluar parkir - {$kendaraan['plat_nomor']} | Durasi {$durasi} jam | Total Rp " . number_format($total, 0, ',', '.');
-
-                $conn->query("
-                    INSERT INTO tb_log_aktivitas (id_user, aktivitas, waktu_aktivitas)
-                    VALUES ($id_user, '$aktivitas', NOW())
-                ");
+                $id_transaksi_baru = $stmtInsert->insert_id;
+                $stmtInsert->close();
+            
+            $id_transaksi_baru = $conn->insert_id;
+            $aktivitas = "Masuk parkir - $plat_db di area $nama_area";
+            
+            $conn->query("
+                INSERT INTO tb_log_aktivitas (
+                id_user,
+                aktivitas,
+                waktu_aktivitas
+                ) VALUES (
+            " . ($id_user ?: "NULL") . ",
+                '$aktivitas',
+                '$now'
+                )
+            ");
 
                 $conn->query("
-                    UPDATE tb_area_parkir 
-                    SET terisi = IF(terisi > 0, terisi - 1, 0)
-                    WHERE id_area = {$parkir['id_area']}
+                    UPDATE tb_area_parkir
+                    SET terisi = terisi + 1
+                    WHERE id_area = $id_area
                 ");
 
-                $message = "Kendaraan berhasil keluar parkir.";
+                $message = "Kendaraan berhasil masuk parkir.";
                 $message_type = "success";
 
                 $data_tiket = [
-                'mode' => 'KELUAR',
-                'waktu_masuk'  => $parkir['waktu_masuk'],
-                'waktu_keluar' => $now,
-                'durasi'       => $durasi,
-                'total'        => $total,
-                'kendaraan'    => $kendaraan,
-                'area'         => ['nama_area' => $parkir['id_area']]
+                    'mode' => 'MASUK',
+                    'waktu_masuk' => $now,
+                    'kendaraan' => $kendaraan,
+                    'area' => ['nama_area' => $nama_area]
                 ];
 
-                if (empty($data_tiket) && isset($_SESSION['tiket_terakhir'])) {
-                    $data_tiket = $_SESSION['tiket_terakhir'];
-                }
+                $_SESSION['tiket_terakhir'] = $data_tiket;
+        
             }
         }
     }
+}
+
+/* ===============================
+   DATA KENDARAAN MASIH PARKIR
+   =============================== */
+
+$data_parkir = $conn->query("
+    SELECT  
+        t.id_parkir,
+        t.waktu_masuk,
+        COALESCE(k.plat_nomor, t.plat_nomor) AS plat_nomor,
+        u.nama_lengkap,
+        u.username
+    FROM tb_transaksi t
+    LEFT JOIN tb_kendaraan k ON t.id_kendaraan = k.id_kendaraan
+    LEFT JOIN tb_user u ON t.id_user = u.id_user
+    WHERE t.status = 'masuk'
+    ORDER BY t.waktu_masuk ASC
+");
+
+/* ===============================
+   JIKA TIDAK ADA TIKET BARU
+   =============================== */
+
+if (empty($data_tiket) && isset($_SESSION['tiket_terakhir'])) {
+    $data_tiket = $_SESSION['tiket_terakhir'];
 }
 ?>
 
@@ -244,27 +390,31 @@ if ($username !== '') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-    
+
 </head>
 
 <body>    
-    <div class="wrapper">
-        <?php include 'sidebar_parkiran.php'; ?>
+<div class="wrapper">
+    <?php include 'sidebar_parkiran.php'; ?>
+    
+    <main class="main-content">
         
-        <main class="main-content">
-            
-        <!-- HEADER -->
-         <header class="main-header"><h2>Transaksi Parkir</h2></header>
+    <!-- HEADER -->
+    <header class="main-header">
+        <h2>Transaksi Parkir</h2>
+    </header>
 
-        <!-- MESSAGE -->
-        <?php if (!empty($message)): ?>
-            <div class="message <?= $message_type ?>">
-                <?= $message ?>
-            </div>
-        <?php endif; ?>
-        
-        <div class="content-body">
-    <!-- Jam Analog -->
+    <!-- MESSAGE -->
+    <?php if (!empty($message)): ?>
+        <div class="message <?= $message_type ?>">
+       
+        <?= $message ?>
+        </div>
+    <?php endif; ?>
+    
+    <div class="content-body">
+
+     <!-- Jam Analog -->
      <div class="clock-container">
         <div class="analog-clock-wrapper">
             <div class="analog-clock" id="clock">
@@ -273,7 +423,6 @@ if ($username !== '') {
                 <div class="hand second" id="secondHand"></div>
                 <div class="center-dot"></div>
 
-    <!-- Angka Jam -->
      <div class="clock-number" data-number="1">1</div>
      <div class="clock-number" data-number="2">2</div>
      <div class="clock-number" data-number="3">3</div>
@@ -298,51 +447,137 @@ if ($username !== '') {
 </div>
 </div>
 
-    <!-- ================= FORM TRANSAKSI ================= -->
-     <form method="POST" class="form-transaksi" style="margin-bottom:20px;">
-        <label>Username</label>
-        <input type="text" name="username" placeholder="Masukkan username..." value="<?= htmlspecialchars($username ?? '') ?>"required>
-        <label>Status</label>
-        <select name="aksi" required>
-            <option value="">-- Pilih Status --</option>
-            <option value="masuk" <?= ($status_terakhir === 'masuk') ? 'disabled' : '' ?>>Masuk Parkir</option>
-            <option value="keluar" <?= (!$status_terakhir || $status_terakhir === 'keluar') ? 'disabled' : '' ?>>Keluar Parkir</option>
-        </select>
+ <!-- ================= FORM TRANSAKSI ================= -->
+<form method="POST" class="form-transaksi" style="margin-bottom:20px;">
+    
+    <!-- USER TERDAFTAR -->
+    <label>User Terdaftar</label>
+    <select name="username">
+        <option value="">-- Pilih User --</option>
 
-        <button type="submit">OK</button>
-    </form>
+        <?php while ($u = $users_dropdown->fetch_assoc()): ?>
+            <option 
+                value="<?= htmlspecialchars($u['username']) ?>"
+                <?= ($u['status_parkir'] === 'masuk') ? 'disabled' : '' ?>
+            >
+                <?= $u['username'] ?>
+                -
+                <?= $u['nama_lengkap'] ?>
+                (<?= $u['plat_nomor'] ?>)
+                <?= ($u['status_parkir'] === 'masuk') ? ' — Sudah Parkir' : '' ?>
+            </option>
+        <?php endwhile; ?>
+    </select>
 
-        <!-- ================= HASIL TRANSAKSI ================= -->
-    <?php if (!empty($data_tiket)): ?>
-        <div class="aksi-tiket" style="margin-top:15px;">
-            <button type="button" onclick="printTiket()" class="btn btn-primary"><i class="fa-solid fa-print"></i> Print Tiket</button>
-        </div>
+    <div style="text-align:center; margin:6px 0;">ATAU</div>
 
-        <div class="hasil-transaksi" id="tiketParkir">
-            <h3>Detail Transaksi</h3>
-            <p><strong>Area Parkir:</strong> <?= $data_tiket['area']['nama_area'] ?? '-' ?></p>
-            <p><strong>Nama:</strong> <?= $data_tiket['kendaraan']['nama_lengkap'] ?? '-' ?></p>
-            <p><strong>Plat Nomor:</strong> <?= $data_tiket['kendaraan']['plat_nomor'] ?? '-' ?></p>
-            <p><strong>Jenis Kendaraan:</strong> <?= ucfirst($data_tiket['kendaraan']['jenis_kendaraan'] ?? '-') ?></p>
-            <p><strong>Tipe:</strong> <?= ucfirst($data_tiket['kendaraan']['tipe_kendaraan'] ?? '-') ?></p>
+    <!-- PENGUNJUNG -->
+    <label>Plat Nomor Pengunjung</label>
+    <input
+        type="text"
+        name="plat_nomor"
+        placeholder="Masukkan plat nomor..."
+        value="<?= htmlspecialchars($plat ?? '') ?>"
+    >
 
-            <?php if ($data_tiket['mode'] === 'MASUK'): ?>
-                <p><strong>Status:</strong> Masuk Parkir</p>
-                <p><strong>Waktu Masuk:</strong> <?= $data_tiket['waktu_masuk'] ?></p>
-            <?php else: ?>
-                <p><strong>Status:</strong> Keluar Parkir</p>
-                <p><strong>Waktu Masuk:</strong> <?= $data_tiket['waktu_masuk'] ?></p>
-                <p><strong>Waktu Keluar:</strong> <?= $data_tiket['waktu_keluar'] ?></p>
-                <p><strong>Durasi:</strong> <?= $data_tiket['durasi'] ?> jam</p>
-                <p><strong>Total Bayar:</strong> Rp <?= number_format($data_tiket['total'],0,',','.') ?></p>
-            <?php endif; ?>
-        </div>
+    <button type="submit">Masuk Parkir</button>
+</form>
+
+<!-- ================= HASIL TRANSAKSI ================= -->
+
+<?php if (!empty($data_tiket)): ?>
+    
+    <div class="aksi-tiket" style="margin-top:15px;">
+        <button type="button" onclick="printTiket()" class="btn btn-primary">
+            <i class="fa-solid fa-print"></i> Print Tiket
+        </button>
+    </div>
+
+    <div class="hasil-transaksi" id="tiketParkir">
+        <h3>Detail Transaksi</h3>
+
+        <p><strong>Area Parkir:</strong> <?= $data_tiket['area']['nama_area'] ?? '-' ?></p>
+        <p><strong>Nama:</strong> <?= $data_tiket['kendaraan']['nama_lengkap'] ?? '-' ?></p>
+        <p><strong>Plat Nomor:</strong> <?= $data_tiket['kendaraan']['plat_nomor'] ?? '-' ?></p>
+        <p><strong>Jenis Kendaraan:</strong> <?= ucfirst($data_tiket['kendaraan']['jenis_kendaraan'] ?? '-') ?></p>
+        <p><strong>Tipe:</strong> <?= ucfirst($data_tiket['kendaraan']['tipe_kendaraan'] ?? '-') ?></p>
+
+        <?php if ($data_tiket['mode'] === 'MASUK'): ?>
+            <p><strong>Status:</strong> Masuk Parkir</p>
+            <p><strong>Waktu Masuk:</strong> <?= $data_tiket['waktu_masuk'] ?></p>
+        <?php else: ?>
+            <p><strong>Status:</strong> Keluar Parkir</p>
+            <p><strong>Waktu Masuk:</strong> <?= $data_tiket['waktu_masuk'] ?></p>
+            <p><strong>Waktu Keluar:</strong> <?= $data_tiket['waktu_keluar'] ?></p>
+            <p><strong>Durasi:</strong> <?= $data_tiket['durasi'] ?> jam</p>
+            <p><strong>Total Bayar:</strong> Rp <?= number_format($data_tiket['total'],0,',','.') ?></p>
         <?php endif; ?>
-        <!-- =================================================== -->
+    </div>
+
+<?php endif; ?>
+
+<div class="empty-space"></div>
+
+<!-- TABLE KENDARAAN TERPARKIR -->
+<table>
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Plat Nomor</th>
+            <th>Nama</th>
+            <th>Username</th>
+            <th>Terparkir Sejak</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    <?php $no = 1; ?>
+
+    <?php if ($data_parkir && $data_parkir->num_rows > 0): ?>
+
+        <?php while ($row = $data_parkir->fetch_assoc()): ?>
+
+        <tr>
+            <td><?= $no++ ?></td>
+
+            <td><?= htmlspecialchars($row['plat_nomor'] ?? '-') ?></td>
+
+            <!-- Kosong jika pengunjung -->
+            <td><?= htmlspecialchars($row['nama_lengkap'] ?? '-') ?></td>
+
+            <td><?= htmlspecialchars($row['username'] ?? '-') ?></td>
+
+            <td><?= date('d-m-Y H:i', strtotime($row['waktu_masuk'])) ?></td>
+
+            <td>
+                <a class="action-link"
+                   href="?keluar=<?= $row['id_parkir'] ?>">
+                   Keluar Parkir
+                </a>
+            </td>
+        </tr>
+
+        <?php endwhile; ?>
+
+    <?php else: ?>
+
+        <tr>
+            <td colspan="6" style="text-align:center;">
+                Tidak ada kendaraan yang sedang parkir
+            </td>
+        </tr>
+
+    <?php endif; ?>
+
+    </tbody>
+</table>
 
     </div>
-</main>
+    </main>
 </div>
+
 
 <script>
 // Jam Digital
@@ -394,8 +629,9 @@ updateDigitalTime();
   setInterval(updateClock, 1000);
 </script>
 
-<!-- Print Tiket -->
- <script>
+<!-- ================= PRINT ================= -->
+
+<script>
 function printTiket() {
     const tiket = document.getElementById("tiketParkir");
 
