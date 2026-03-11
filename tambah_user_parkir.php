@@ -4,9 +4,6 @@ $active_page = 'tambah_user_parkir.php';
 include 'koneksi_parkir.php';
 include 'proteksi_role_parkir.php';
 
-$message = '';
-$type = '';
-
 /* ================= DELETE ================= */
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $id = intval($_GET['id']);
@@ -20,7 +17,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
 
 /* ================= EDIT LOAD ================= */
 $edit_mode = false;
-$edit_id = $edit_nama = $edit_username = $edit_role = '';
+$edit_id = $edit_nama_lengkap = $edit_username = $edit_role = '';
 
 if (isset($_GET['action']) && $_GET['action'] === 'edit') {
     $id = intval($_GET['id']);
@@ -32,7 +29,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit') {
     if ($row = $res->fetch_assoc()) {
         $edit_mode = true;
         $edit_id = $row['id_user'];
-        $edit_nama = $row['nama_lengkap'];
+        $edit_nama_lengkap = $row['nama_lengkap']; 
         $edit_username = $row['username'];
         $edit_role = $row['role'];
     }
@@ -42,7 +39,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $edit_id = intval($_POST['edit_id'] ?? 0);
-    $nama = trim($_POST['nama']);
+    $nama_lengkap = trim($_POST['nama_lengkap']);
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
     $role = $_POST['role'];
@@ -51,20 +48,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($edit_id > 0) {
 
         if (!empty($password)) {
-            $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("
                 UPDATE tb_user 
                 SET nama_lengkap=?, username=?, password=?, role=? 
                 WHERE id_user=?
             ");
-            $stmt->bind_param("ssssi", $nama, $username, $hash, $role, $edit_id);
+            $stmt->bind_param("ssssi", $nama_lengkap, $username, $password, $role, $edit_id);
         } else {
             $stmt = $conn->prepare("
                 UPDATE tb_user 
                 SET nama_lengkap=?, username=?, role=? 
                 WHERE id_user=?
             ");
-            $stmt->bind_param("sssi", $nama, $username, $role, $edit_id);
+            $stmt->bind_param("sssi", $nama_lengkap, $username, $role, $edit_id);
         }
 
         $stmt->execute();
@@ -88,19 +84,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
     
-    $hash = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $conn->prepare("
-    INSERT INTO tb_user (nama_lengkap, username, password, role, status_aktif)
-    VALUES (?, ?, ?, ?, 1)
+        INSERT INTO tb_user (nama_lengkap, username, password, role)
+        VALUES (?, ?, ?, ?)
     ");
     
-    $stmt->bind_param("ssss", $nama, $username, $hash, $role);
-    $stmt->execute(); // ⬅️ INI YANG TADI HILANG
+    $stmt->bind_param("ssss", $nama_lengkap, $username, $password, $role);
+    $stmt->execute();
     
     header("Location: tambah_user_parkir.php?message=User berhasil ditambahkan&type=success");
     exit();
-
-
 }
 ?>
 
@@ -142,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
     <label>Nama Lengkap</label>
-    <input type="text" name="nama" value="<?= $edit_nama ?>" required>
+    <input type="text" name="nama_lengkap" value="<?= $edit_nama_lengkap ?>" required>
 
     <label>Username</label>
     <input type="text" name="username" value="<?= $edit_username ?>" required>
