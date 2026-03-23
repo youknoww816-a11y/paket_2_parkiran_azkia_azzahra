@@ -7,6 +7,7 @@ include 'proteksi_role_parkir.php';
 /* ================= DELETE ================= */
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $id = intval($_GET['id']);
+
     $stmt = $conn->prepare("DELETE FROM tb_user WHERE id_user = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
@@ -20,16 +21,19 @@ $edit_mode = false;
 $edit_id = $edit_nama_lengkap = $edit_username = $edit_role = '';
 
 if (isset($_GET['action']) && $_GET['action'] === 'edit') {
+
     $id = intval($_GET['id']);
+
     $stmt = $conn->prepare("SELECT * FROM tb_user WHERE id_user = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
+
     $res = $stmt->get_result();
 
     if ($row = $res->fetch_assoc()) {
         $edit_mode = true;
         $edit_id = $row['id_user'];
-        $edit_nama_lengkap = $row['nama_lengkap']; 
+        $edit_nama_lengkap = $row['nama_lengkap'];
         $edit_username = $row['username'];
         $edit_role = $row['role'];
     }
@@ -41,57 +45,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $edit_id = intval($_POST['edit_id'] ?? 0);
     $nama_lengkap = trim($_POST['nama_lengkap']);
     $username = trim($_POST['username']);
-    $password = trim($_POST['password']);
+    $password = $_POST['password'] ?? '';
     $role = $_POST['role'];
 
     /* ===== MODE EDIT ===== */
     if ($edit_id > 0) {
 
         if (!empty($password)) {
+
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+
             $stmt = $conn->prepare("
                 UPDATE tb_user 
                 SET nama_lengkap=?, username=?, password=?, role=? 
                 WHERE id_user=?
             ");
-            $stmt->bind_param("ssssi", $nama_lengkap, $username, $password, $role, $edit_id);
+
+            $stmt->bind_param("ssssi", $nama_lengkap, $username, $hash, $role, $edit_id);
+
         } else {
+
             $stmt = $conn->prepare("
                 UPDATE tb_user 
                 SET nama_lengkap=?, username=?, role=? 
                 WHERE id_user=?
             ");
+
             $stmt->bind_param("sssi", $nama_lengkap, $username, $role, $edit_id);
         }
 
         $stmt->execute();
+
         header("Location: tambah_user_parkir.php?message=User berhasil diperbarui&type=success");
         exit();
     }
-    
+
     /* ===== MODE TAMBAH ===== */
+
     if (empty($password)) {
         header("Location: tambah_user_parkir.php?message=Password wajib diisi&type=error");
         exit();
     }
-    
+
+    /* cek username */
     $cek = $conn->prepare("SELECT id_user FROM tb_user WHERE username=?");
     $cek->bind_param("s", $username);
     $cek->execute();
     $cek->store_result();
-    
+
     if ($cek->num_rows > 0) {
         header("Location: tambah_user_parkir.php?message=Username sudah digunakan&type=error");
         exit();
     }
-    
+
+    $hash = password_hash($password, PASSWORD_DEFAULT);
+
     $stmt = $conn->prepare("
-        INSERT INTO tb_user (nama_lengkap, username, password, role)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO tb_user (nama_lengkap, username, password, role, status_aktif)
+        VALUES (?, ?, ?, ?, 1)
     ");
-    
-    $stmt->bind_param("ssss", $nama_lengkap, $username, $password, $role);
+
+    $stmt->bind_param("ssss", $nama_lengkap, $username, $hash, $role);
     $stmt->execute();
-    
+
     header("Location: tambah_user_parkir.php?message=User berhasil ditambahkan&type=success");
     exit();
 }
@@ -129,7 +145,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include 'sidebar_parkiran.php'; ?>
     
     <!-- FORM -->
-     <form method="POST">
         <?php if ($edit_mode): ?>
             <input type="hidden" name="edit_id" value="<?= $edit_id ?>">
         <?php endif; ?>

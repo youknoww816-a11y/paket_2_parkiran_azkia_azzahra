@@ -40,6 +40,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_area'])) {
     $status = $_POST['status_area'];
     $kapasitas = $_POST['kapasitas'];
 
+    
+// Ambil data terisi dulu
+$cek = $conn->query("
+    SELECT terisi FROM tb_area_parkir WHERE id_area = $id_area
+");
+$data = $cek->fetch_assoc();
+
+if ($status == 'ditutup' && $data['terisi'] > 0) {
+    header("Location: area_parkir.php?msg=gagal_tutup");
+    exit;
+}
+
     $stmt = $conn->prepare("
         UPDATE tb_area_parkir 
         SET status_area_parkir = ?, kapasitas = ?
@@ -81,7 +93,7 @@ if (isset($_GET['msg'])) {
 
         case 'tambah_gagal':
             $message = "Gagal menambahkan area parkir";
-            $message_type = "danger";
+            $message_type = "error";
             break;
 
         case 'update_sukses':
@@ -91,7 +103,7 @@ if (isset($_GET['msg'])) {
 
         case 'update_gagal':
             $message = "Gagal memperbarui area";
-            $message_type = "danger";
+            $message_type = "error";
             break;
 
         case 'hapus_sukses':
@@ -101,8 +113,14 @@ if (isset($_GET['msg'])) {
 
         case 'hapus_gagal':
             $message = "Gagal menghapus area";
-            $message_type = "danger";
+            $message_type = "error";
             break;
+
+        case 'gagal_tutup':
+            $message = "Masih ada kendaraan yang belum keluar.";
+            $message_type = "error";
+            break;
+    
     }
 }
 

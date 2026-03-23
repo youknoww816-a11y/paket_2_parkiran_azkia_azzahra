@@ -255,17 +255,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($username !== '' || $plat !== ''))
 
         if ($message === '') {
 
-            $qArea = $conn->query("
-                SELECT id_area, nama_area
-                FROM tb_area_parkir
-                WHERE terisi < kapasitas
-                LIMIT 1
-            ");
+    // Cek dulu: ada area yang tidak ditutup?
+    $cekAreaAktif = $conn->query("
+        SELECT id_area
+        FROM tb_area_parkir
+        WHERE status_area_parkir != 'ditutup'
+    ");
 
-            if ($qArea->num_rows == 0) {
+    if ($cekAreaAktif->num_rows == 0) {
 
-                $message = "Area parkir penuh.";
-                $message_type = "error";
+        $message = "Semua area parkir sedang ditutup.";
+        $message_type = "error";
+
+    } else {
+
+        // Baru cari area yang masih ada slot
+        $qArea = $conn->query("
+            SELECT id_area, nama_area
+            FROM tb_area_parkir
+            WHERE terisi < kapasitas
+            AND status_area_parkir != 'ditutup'
+            LIMIT 1
+        ");
+
+        if ($qArea->num_rows == 0) {
+
+            $message = "Area parkir penuh.";
+            $message_type = "error";
 
             } else {
 
@@ -341,7 +357,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($username !== '' || $plat !== ''))
                 ];
 
                 $_SESSION['tiket_terakhir'] = $data_tiket;
-        
+            
+                }
             }
         }
     }
@@ -661,29 +678,3 @@ function printTiket() {
 </body>
 </html>
 
-<!-- Note:
-5 Februari 2026 :
-
-    Mungkin durasi seberapa lama parkir perlu diperbaiki. . . 
-    Sama mungkin kamu harus input password. . . 
-
-6 Februari 2026 :
-
-    Baru dikasih tau, kurang lebih katanya untuk mengabil tiket parkir memasukan username itu kaya enggak masuk akal. . .
-
-    Aku awalnya juga mau pengguna itu masukin plat nomor untuk ngambil tiket parkir, tapi karean di contoh aja plat nomor
-    itu bukan primary key apalagi unique key jadi aku pake username aja.
-
-    Secara realistis, masuk parkir aja kamu hanya perlu menekan 1 tombol lalu tiket keluar tanpa perlu menginput
-    plat nomor atau nama. . .
-
-    Tapi karena itu menggunakan mesin dan ada penjaganya, bukan aplikasi yang jelas belum sempurna + dibuat 1 bulan.
-
-    Aku awalnya juga mau ngebuat scan QR untuk mengambil tiket biar lebih simple dan realistis untuk pengguna.
-    Sayangnya tugas ini cuma 1 bulan.
-    
-    Aku ngebuat website absensi siswa aja yang menggunakan scan QR perlu 3 bulan lebih untuk bekerja sesuai keinginan.
-    Itu juga masih ada beberapa bug kecil.
-
-    Sama aku belum ngebuat untuk download pdf atau print
-           -->
