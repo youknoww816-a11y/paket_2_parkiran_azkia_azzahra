@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('Asia/Jakarta');
+
 $active_page = 'log_aktivitas_parkiran';
 
 include 'koneksi_parkir.php';
@@ -52,15 +54,34 @@ SELECT
     t.durasi_jam,
     t.biaya_total,
 
-    COALESCE(u.username, 'Guest') AS username,
-    COALESCE(u.nama_lengkap, 'Non-user') AS nama_lengkap,
+    CASE 
+    WHEN t.id_kendaraan IS NULL THEN 'Pengunjung'
+    ELSE u.username
+END AS username,
+
+CASE 
+    WHEN t.id_kendaraan IS NULL THEN 'Pengunjung'
+    ELSE u.nama_lengkap
+END AS nama_lengkap,
 
     -- Ambil plat nomor dari kendaraan atau input manual
     COALESCE(k.plat_nomor, t.plat_nomor, t.plat_nomor_tamu) AS plat_nomor,
 
-    COALESCE(k.tipe_kendaraan, 'Manual Input') AS tipe_kendaraan,
-    COALESCE(k.jenis_kendaraan, 'Manual Input') AS jenis_kendaraan,
-    COALESCE(k.warna, '-') AS warna,
+    CASE 
+    WHEN t.id_kendaraan IS NULL THEN ''
+    ELSE k.tipe_kendaraan
+END AS tipe_kendaraan,
+
+CASE 
+    WHEN t.id_kendaraan IS NULL THEN ''
+    ELSE k.jenis_kendaraan
+END AS jenis_kendaraan,
+
+CASE 
+    WHEN t.id_kendaraan IS NULL THEN ''
+    ELSE k.warna
+END AS warna,
+
     COALESCE(k.pemilik, '-') AS pemilik,
 
     a.nama_area,
@@ -68,20 +89,20 @@ SELECT
     tr.tarif_per_jam,
 
     CASE
-        WHEN t.waktu_keluar IS NULL THEN
-            CONCAT(
-                'Masuk: ',
-                DATE_FORMAT(t.waktu_masuk, '%d %b %Y %H:%i'),
-                ' | Status: Masih Terparkir'
-            )
-        ELSE
-            CONCAT(
-                'Masuk: ',
-                DATE_FORMAT(t.waktu_masuk, '%d %b %Y %H:%i'),
-                ' | Keluar: ',
-                DATE_FORMAT(t.waktu_keluar, '%d %b %Y %H:%i')
-            )
-    END AS aktivitas
+    WHEN t.waktu_keluar IS NULL THEN
+        CONCAT(
+            'Masuk: ',
+            DATE_FORMAT(t.waktu_masuk, '%d %b %Y %H:%i'),
+            '\nStatus: Masih Terparkir'
+        )
+    ELSE
+        CONCAT(
+            'Masuk: ',
+            DATE_FORMAT(t.waktu_masuk, '%d %b %Y %H:%i'),
+            '\nKeluar: ',
+            DATE_FORMAT(t.waktu_keluar, '%d %b %Y %H:%i')
+        )
+END AS aktivitas
 
 FROM tb_transaksi t
 LEFT JOIN tb_kendaraan k ON t.id_kendaraan = k.id_kendaraan
@@ -259,12 +280,13 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
                         <tr>
                             <th>Username</th>
                             <th>Nama Pemilik</th>
-                            <th>Tipe Kendaraan</th>
-                            <th>Jenis</th>
                             <th>Plat Nomor</th>
+                            <th>Jenis</th>
+                            <th>Tipe Kendaraan</th>
                             <th>Warna</th>
                             <th>Status</th>
                             <th>Tarif</th>
+                            <th>Total Biaya</th>
                             <th>Durasi</Th>
                             <th>Area parkir</th>
                         </tr>
@@ -275,44 +297,53 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
     <?php while ($row = $result_aktivitas->fetch_assoc()): ?>
 
         <?php
-        // Hitung durasi realtime kalau masih parkir
-        if ($row['status'] === 'masuk') {
-            $masuk = new DateTime($row['waktu_masuk']);
-            $now   = new DateTime();
-            $diff  = $masuk->diff($now);
-            $durasi = ($diff->days * 24) + $diff->h;
-            if ($durasi < 1) $durasi = 1;
-        } else {
+    // Hitung durasi realtime kalau masih parkir
+       
+        $masuk = strtotime($row['waktu_masuk']);
+        $now   = time();
+        
+        $durasi = ceil(($now - $masuk) / 3600);
+        if ($durasi < 1) $durasi = 1;
+        
+        else {
             $durasi = $row['durasi_jam'];
         }
         ?>
 
-         <?php $isManual = empty($row['id_kendaraan']); ?>
+        <?php
+        $isManual = empty($row['id_kendaraan']);
+        
+        if ($isManual) {
+            $tarif = 4000;
+        
+        } else {        
+            $tipe = strtolower($row['tipe_kendaraan']);
+            if ($tipe === 'motor') {
+                $tarif = 2000;
+            
+            } elseif ($tipe === 'mobil') {
+                $tarif = 5000;
+            
+            } elseif ($tipe === 'lainnya') {
+                $tarif = 6000;
+            
+            } else {
+                $tarif = 0; // fallback kalau data aneh
+            }
+        }
+    ?>
+
         <tr>
-            <td><?= $isManual ? '-' : htmlspecialchars($row['username']) ?></td>
-            <td><?= $isManual ? '-' : htmlspecialchars($row['pemilik']) ?></td>
-            <td><?= $isManual ? 'Manual' : htmlspecialchars($row['tipe_kendaraan']) ?></td>
-            <td><?= $isManual ? '-' : htmlspecialchars($row['jenis_kendaraan']) ?></td>
+            <td><?= htmlspecialchars($row['username']) ?></td>
+            <td><?= htmlspecialchars($row['nama_lengkap']) ?></td>
             <td><?= htmlspecialchars($row['plat_nomor']) ?></td>
-            <td><?= $isManual ? '-' : htmlspecialchars($row['warna']) ?></td>
-
-            <!-- Status panjang -->
-            <td><?= htmlspecialchars($row['aktivitas']) ?></td>
-
-            <!-- Tarif -->
-             <td>
-                <?php if ($row['status'] === 'keluar'): ?>
-                    Rp <?= number_format($row['biaya_total'], 0, ',', '.') ?>
-                    <?php else: ?>
-                        <em>Kendaraan masih di area parkir</em>
-                        <?php endif; ?>
-                    </td>
-
-            <!-- Durasi -->
-            <td><?= $durasi ?> jam</td>
-
-            <!-- Area Parkir -->
-            <td><?= htmlspecialchars($row['nama_area']) ?></td>
+            <td><?= htmlspecialchars($row['tipe_kendaraan']) ?></td>
+            <td><?= htmlspecialchars($row['jenis_kendaraan']) ?></td>
+            <td><?= htmlspecialchars($row['warna']) ?></td>
+            <td style="white-space: pre-line;"><?= htmlspecialchars($row['aktivitas']) ?></td>
+            <td>Rp <?= number_format($tarif, 0, ',', '.') ?></td>
+            <td><?php if ($row['status'] === 'keluar'): ?>Rp <?= number_format($row['biaya_total'], 0, ',', '.') ?><?php else: ?><em>Kendaraan masih terparkir</em><?php endif; ?></td>
+            <td><?= $durasi ?> jam</td><td><?= htmlspecialchars($row['nama_area']) ?></td>
         </tr>
 
     <?php endwhile; ?>

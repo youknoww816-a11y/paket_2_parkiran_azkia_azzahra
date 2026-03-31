@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 18 Feb 2026 pada 05.23
+-- Waktu pembuatan: 31 Mar 2026 pada 08.01
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -41,10 +41,9 @@ CREATE TABLE `tb_area_parkir` (
 --
 
 INSERT INTO `tb_area_parkir` (`id_area`, `nama_area`, `tipe_kendaraan`, `kapasitas`, `terisi`, `status_area_parkir`) VALUES
-(6, '1MB', 'motor', 20, 1, 'ditutup'),
-(7, '2MB', 'motor', 45, 0, 'ditutup'),
+(7, '2MB', 'motor', 45, 8, 'tempat kosong masih tersedia'),
 (17, '1MA', 'motor', 50, 0, 'tempat kosong masih tersedia'),
-(26, '1CA', 'mobil', 17, 0, 'tempat kosong masih tersedia'),
+(26, '1CA', 'mobil', 17, 0, 'ditutup'),
 (27, '1OB', 'lainnya', 10, 0, 'tempat kosong masih tersedia');
 
 -- --------------------------------------------------------
@@ -68,11 +67,11 @@ CREATE TABLE `tb_kendaraan` (
 --
 
 INSERT INTO `tb_kendaraan` (`id_kendaraan`, `plat_nomor`, `tipe_kendaraan`, `jenis_kendaraan`, `warna`, `pemilik`, `id_user`) VALUES
-(4, 'D 1010 TSK', 'motor', 'Motor Yamaha', 'Magenta', 'ANOMALI', 6),
 (6, 'B 6716 VRZ', 'motor', 'Motor Honda', 'Merah', 'SA\'ID', 4),
 (9, 'B 6716 ARC', 'lainnya', 'Van', 'Putih', 'UDIN', 2),
 (10, 'B 6816 VRZ', 'mobil', 'Mobil Toyota', 'Hitam', 'TEST', 3),
-(11, 'T 0WN 3NR', 'motor', 'Motor Yamaha', 'Biru', 'Owner', 9);
+(11, 'T 0WN 3NR', 'motor', 'Motor Yamaha', 'Biru', 'Owner', 9),
+(12, 'F TSI 0UT', 'motor', 'Motor Honda', 'Magenta', 'Admin?', 12);
 
 -- --------------------------------------------------------
 
@@ -93,23 +92,53 @@ CREATE TABLE `tb_log_aktivitas` (
 
 INSERT INTO `tb_log_aktivitas` (`id_log`, `id_user`, `aktivitas`, `waktu_aktivitas`) VALUES
 (71, 3, 'Masuk parkir - B 6816 VRZ di area 1MB', '2026-02-18 07:19:26'),
-(72, NULL, 'Masuk parkir - F UCK di area 1MB', '2026-02-18 07:31:10'),
-(73, NULL, 'Masuk parkir - F UCK di area 1MB', '2026-02-18 07:38:19'),
 (74, 9, 'Masuk parkir - T 0WN 3NR di area 1MB', '2026-02-18 09:34:55'),
-(75, 6, 'Masuk parkir - D 1010 TSK di area 1MB', '2026-02-18 10:32:21'),
 (76, 4, 'Masuk parkir - B 6716 VRZ di area 1MB', '2026-02-18 10:39:28'),
 (77, 9, 'Keluar parkir - T 0WN 3NR dari area 1MB', '2026-02-18 10:40:08'),
 (78, 9, 'Masuk parkir - T 0WN 3NR di area 1MB', '2026-02-18 10:43:50'),
-(79, NULL, 'Masuk parkir - F UCK di area 1MB', '2026-02-18 10:44:34'),
-(80, NULL, 'Masuk parkir - F UCK di area 1MB', '2026-02-18 10:58:49'),
-(81, NULL, 'Keluar parkir - F UCK dari area 1MB', '2026-02-18 10:58:52'),
 (82, 3, 'Masuk parkir - B 6816 VRZ di area 1MB', '2026-02-18 10:58:57'),
 (83, NULL, 'Masuk parkir - K di area 1MB', '2026-02-18 11:00:05'),
 (84, NULL, 'Masuk parkir - K di area 1MB', '2026-02-18 11:00:18'),
 (85, NULL, 'Keluar parkir - K dari area 1MB', '2026-02-18 11:00:31'),
 (86, NULL, 'Keluar parkir - K dari area 1MB', '2026-02-18 11:00:46'),
-(87, NULL, 'Keluar parkir - F UCK dari area 1MB', '2026-02-18 11:19:26'),
-(88, NULL, 'Masuk parkir - F UCK di area 1MB', '2026-02-18 11:19:49');
+(89, 2, 'Masuk parkir - B 6716 ARC di area 1MB', '2026-02-23 13:44:06'),
+(90, 9, 'Keluar parkir - T 0WN 3NR dari area 1MB', '2026-02-23 13:44:10'),
+(91, 12, 'Masuk parkir - F UCK di area 2MB', '2026-03-11 15:58:31'),
+(92, 12, 'Keluar parkir - F UCK dari area 2MB', '2026-03-11 15:58:35'),
+(93, 2, 'Masuk parkir - B 6716 ARC di area 2MB', '2026-03-11 16:05:14'),
+(94, 2, 'Keluar parkir - B 6716 ARC dari area 2MB', '2026-03-23 09:51:14'),
+(95, NULL, 'Masuk parkir - K di area 2MB', '2026-03-23 10:17:52'),
+(96, 4, 'Masuk parkir - B 6716 VRZ di area 2MB', '2026-03-23 10:32:57'),
+(97, 4, 'Keluar parkir - B 6716 VRZ dari area 2MB', '2026-03-23 11:19:16'),
+(98, NULL, 'Keluar parkir - K dari area 2MB', '2026-03-23 11:24:02'),
+(99, 12, 'Masuk parkir - F UCK di area 2MB', '2026-03-23 11:24:13'),
+(100, 12, 'Keluar parkir - F UCK dari area 2MB', '2026-03-23 11:46:01'),
+(101, NULL, 'Masuk parkir - F di area 2MB', '2026-03-23 12:27:58'),
+(102, NULL, 'Masuk parkir - F di area 2MB', '2026-03-31 06:47:32'),
+(103, NULL, 'Keluar parkir - F dari area 2MB', '2026-03-31 06:47:42'),
+(104, NULL, 'Keluar parkir - F dari area 2MB', '2026-03-31 07:07:10'),
+(105, 2, 'Masuk parkir - B 6716 ARC di area 2MB', '2026-03-31 07:07:30'),
+(106, NULL, 'Masuk parkir - N di area 2MB', '2026-03-31 07:07:39'),
+(107, 9, 'Masuk parkir - T 0WN 3NR di area 2MB', '2026-03-31 07:30:50'),
+(108, NULL, 'Masuk parkir - X di area 2MB', '2026-03-31 07:31:07'),
+(109, 2, 'Keluar parkir - B 6716 ARC dari area 2MB', '2026-03-31 08:50:17'),
+(110, 3, 'Masuk parkir - B 6816 VRZ di area 2MB', '2026-03-31 08:50:30'),
+(111, 4, 'Masuk parkir - B 6716 VRZ di area 2MB', '2026-03-31 08:50:46'),
+(112, 2, 'Masuk parkir - B 6716 ARC di area 2MB', '2026-03-31 08:55:18'),
+(113, 4, 'Masuk parkir - B 6716 VRZ di area 2MB', '2026-03-31 08:55:26'),
+(114, 3, 'Masuk parkir - B 6816 VRZ di area 2MB', '2026-03-31 08:55:38'),
+(115, 12, 'Masuk parkir - F TSI 0UT di area 2MB', '2026-03-31 09:33:20'),
+(116, NULL, 'Masuk parkir - K di area 2MB', '2026-03-31 09:33:27'),
+(117, NULL, 'Keluar parkir - K dari area 2MB', '2026-03-31 15:50:00'),
+(118, 12, 'Keluar parkir - F TSI 0UT dari area 2MB', '2026-03-31 16:24:09'),
+(119, 12, 'Masuk parkir - F TSI 0UT di area 2MB', '2026-03-31 16:35:18'),
+(120, 12, 'Keluar parkir - F TSI 0UT dari area 2MB', '2026-03-31 16:35:25'),
+(121, 3, 'Keluar parkir - B 6816 VRZ dari area 2MB', '2026-03-31 16:35:36'),
+(122, 2, 'Keluar parkir - B 6716 ARC dari area 2MB', '2026-03-31 16:36:00'),
+(123, 4, 'Keluar parkir - B 6716 VRZ dari area 2MB', '2026-03-31 16:36:05'),
+(124, 3, 'Masuk parkir - B 6816 VRZ di area 2MB', '2026-03-31 16:36:13'),
+(125, 9, 'Masuk parkir - T 0WN 3NR di area 2MB', '2026-03-31 16:36:20'),
+(126, 2, 'Masuk parkir - B 6716 ARC di area 2MB', '2026-03-31 16:36:33');
 
 -- --------------------------------------------------------
 
@@ -181,58 +210,17 @@ CREATE TABLE `tb_transaksi` (
 --
 
 INSERT INTO `tb_transaksi` (`id_parkir`, `id_kendaraan`, `plat_nomor`, `plat_nomor_tamu`, `waktu_masuk`, `waktu_keluar`, `id_tarif`, `durasi_jam`, `biaya_total`, `status`, `id_user`, `id_area`, `jenis_transaksi`) VALUES
-(29, 4, NULL, NULL, '2026-02-03 14:02:14', '2026-02-03 14:02:40', 1, 1, 2000, 'keluar', 6, 17, 'user'),
-(30, 9, NULL, NULL, '2026-02-03 14:08:19', '2026-02-05 13:31:54', 3, 48, 35000, 'keluar', 2, 27, 'user'),
-(31, 10, NULL, NULL, '2026-02-03 14:29:26', '2026-02-03 14:29:54', 2, 1, 5000, 'keluar', 3, 26, 'user'),
-(32, 10, NULL, NULL, '2026-02-03 14:36:57', '2026-02-03 14:37:32', 2, 1, 5000, 'keluar', 3, 26, 'user'),
-(33, 10, NULL, NULL, '2026-02-03 14:41:17', '2026-02-03 14:54:54', 2, 1, 5000, 'keluar', 3, 26, 'user'),
-(34, 4, NULL, NULL, '2026-02-04 07:47:53', '2026-02-04 07:50:03', 1, 1, 2000, 'keluar', 6, 17, 'user'),
-(35, 4, NULL, NULL, '2026-02-04 07:50:19', '2026-02-04 07:59:35', 1, 1, 2000, 'keluar', 6, 17, 'user'),
-(36, 4, NULL, NULL, '2026-02-04 07:59:52', '2026-02-04 08:24:55', 1, 1, 2000, 'keluar', 6, 17, 'user'),
-(37, 4, NULL, NULL, '2026-02-04 08:25:53', '2026-02-04 08:26:44', 1, 1, 2000, 'keluar', 6, 17, 'user'),
-(38, 4, NULL, NULL, '2026-02-04 08:27:13', '2026-02-04 08:28:45', 1, 1, 2000, 'keluar', 6, 17, 'user'),
-(39, 4, NULL, NULL, '2026-02-06 06:50:52', '2026-02-06 06:51:06', 1, 1, 2000, 'keluar', 6, 17, 'user'),
-(40, 9, NULL, NULL, '2026-02-10 08:53:07', '2026-02-10 10:41:06', 3, 2, 11000, 'keluar', 2, 27, 'user'),
-(41, 9, NULL, NULL, '2026-02-10 11:03:12', '2026-02-10 11:04:36', 3, 1, 6000, 'keluar', 2, 27, 'user'),
-(42, 9, NULL, NULL, '2026-02-10 11:06:18', '2026-02-16 15:19:36', 3, 149, 894000, 'keluar', 2, 27, 'user'),
-(43, 4, NULL, NULL, '2026-02-10 11:13:51', '2026-02-10 11:23:13', 1, 1, 2000, 'keluar', 6, 17, 'user'),
-(44, 4, NULL, NULL, '2026-02-10 11:28:35', '2026-02-10 11:28:51', 1, 1, 2000, 'keluar', 6, 17, 'user'),
-(45, 4, NULL, NULL, '2026-02-10 11:30:20', '2026-02-10 11:41:22', 1, 1, 2000, 'keluar', 6, 17, 'user'),
-(46, 4, NULL, NULL, '2026-02-10 11:41:32', '2026-02-10 14:54:53', 1, 4, 8000, 'keluar', 6, 17, 'user'),
-(47, 4, NULL, NULL, '2026-02-10 15:04:33', '2026-02-10 15:05:15', 1, 1, 2000, 'keluar', 6, 17, 'user'),
-(48, 4, NULL, NULL, '2026-02-10 15:13:43', '2026-02-10 15:13:54', 1, 1, 2000, 'keluar', 6, 17, 'user'),
-(49, 4, NULL, NULL, '2026-02-11 06:45:28', '2026-02-16 15:35:47', 1, 129, 258000, 'keluar', 6, 17, 'user'),
-(51, 6, NULL, NULL, '2026-02-16 13:43:15', '2026-02-16 15:20:23', 1, 2, 4000, 'keluar', 4, 6, 'user'),
-(52, NULL, 'K', NULL, '2026-02-16 14:36:44', '2026-02-16 15:35:38', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(53, 4, 'D 1010 TSK', NULL, '2026-02-16 15:35:59', '2026-02-16 15:50:43', 1, 1, 2000, 'keluar', 6, 6, 'user'),
-(54, NULL, 'T', NULL, '2026-02-16 15:36:24', '2026-02-18 06:17:15', 1, 39, 78000, 'keluar', NULL, 6, 'user'),
-(55, NULL, 'K', NULL, '2026-02-16 15:39:44', '2026-02-18 06:19:20', 1, 39, 78000, 'keluar', NULL, 6, 'user'),
-(56, NULL, 'F', NULL, '2026-02-17 12:54:47', '2026-02-18 06:19:23', 1, 18, 36000, 'keluar', NULL, 6, 'user'),
-(57, 9, 'B 6716 ARC', NULL, '2026-02-17 17:08:42', '2026-02-18 06:19:26', 3, 14, 84000, 'keluar', 2, 6, 'user'),
-(58, 11, 'T 0WN 3NR', NULL, '2026-02-17 17:24:12', '2026-02-17 17:29:50', 1, 1, 2000, 'keluar', 9, 6, 'user'),
-(59, 10, 'B 6816 VRZ', NULL, '2026-02-18 06:20:54', '2026-02-18 07:12:06', 2, 1, 5000, 'keluar', 3, 6, 'user'),
-(60, NULL, 'F', NULL, '2026-02-18 06:21:03', '2026-02-18 07:11:43', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(61, NULL, 'F UCK', NULL, '2026-02-18 06:51:18', '2026-02-18 06:57:35', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(62, NULL, 'F UCK', NULL, '2026-02-18 06:53:56', '2026-02-18 07:12:09', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(63, NULL, 'F UCK', NULL, '2026-02-18 06:54:14', '2026-02-18 06:57:52', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(64, NULL, 'F UCK', NULL, '2026-02-18 06:56:26', '2026-02-18 06:57:48', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(65, NULL, 'F UCK', NULL, '2026-02-18 06:57:25', '2026-02-18 06:57:42', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(66, 11, 'T 0WN 3NR', NULL, '2026-02-18 07:12:19', '2026-02-18 07:18:55', 1, 1, 2000, 'keluar', 9, 6, 'user'),
-(67, NULL, 'F UCK', NULL, '2026-02-18 07:13:00', '2026-02-18 07:18:52', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(68, NULL, 'F UCK', NULL, '2026-02-18 07:17:59', '2026-02-18 07:18:34', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(69, 10, 'B 6816 VRZ', NULL, '2026-02-18 07:19:26', '2026-02-18 10:33:03', 2, 4, 20000, 'keluar', 3, 6, 'user'),
-(70, NULL, 'F UCK', NULL, '2026-02-18 07:31:10', '2026-02-18 09:10:02', 1, 2, 4000, 'keluar', NULL, 6, 'user'),
-(71, NULL, 'F UCK', NULL, '2026-02-18 07:38:19', '2026-02-18 07:38:26', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(72, 11, 'T 0WN 3NR', NULL, '2026-02-18 09:34:55', '2026-02-18 10:40:08', 1, 2, 4000, 'keluar', 9, 6, 'user'),
-(73, 4, 'D 1010 TSK', NULL, '2026-02-18 10:32:21', NULL, NULL, 0, 0, 'masuk', 6, 6, 'user'),
-(74, 6, 'B 6716 VRZ', NULL, '2026-02-18 10:39:28', NULL, NULL, 0, 0, 'masuk', 4, 6, 'user'),
-(75, 11, 'T 0WN 3NR', NULL, '2026-02-18 10:43:50', NULL, NULL, 0, 0, 'masuk', 9, 6, 'user'),
-(76, NULL, 'F UCK', NULL, '2026-02-18 10:44:34', '2026-02-18 11:19:26', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(77, NULL, 'F UCK', NULL, '2026-02-18 10:58:49', '2026-02-18 10:58:52', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(78, 10, 'B 6816 VRZ', NULL, '2026-02-18 10:58:57', NULL, NULL, 0, 0, 'masuk', 3, 6, 'user'),
-(79, NULL, 'K', NULL, '2026-02-18 11:00:05', '2026-02-18 11:00:46', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(80, NULL, 'K', NULL, '2026-02-18 11:00:18', '2026-02-18 11:00:31', 1, 1, 2000, 'keluar', NULL, 6, 'user'),
-(81, NULL, 'F UCK', NULL, '2026-02-18 11:19:49', NULL, NULL, 0, 0, 'masuk', NULL, 6, 'user');
+(91, NULL, NULL, 'N', '2026-03-31 07:07:39', NULL, NULL, 0, 0, 'masuk', NULL, 7, 'tamu'),
+(93, NULL, NULL, 'X', '2026-03-31 07:31:07', NULL, NULL, 0, 0, 'masuk', NULL, 7, 'tamu'),
+(96, 9, 'B 6716 ARC', NULL, '2026-03-31 08:55:18', '2026-03-31 16:36:00', 3, 8, 12000, 'keluar', 2, 7, 'user'),
+(97, 6, 'B 6716 VRZ', NULL, '2026-03-31 08:55:26', '2026-03-31 16:36:05', 1, 8, 4000, 'keluar', 4, 7, 'user'),
+(98, 10, 'B 6816 VRZ', NULL, '2026-03-31 08:55:38', '2026-03-31 16:35:36', 2, 8, 10000, 'keluar', 3, 7, 'user'),
+(99, 12, 'F TSI 0UT', NULL, '2026-03-31 09:33:20', '2026-03-31 16:24:09', NULL, 7, 0, 'keluar', 12, 7, 'user'),
+(100, NULL, NULL, 'K', '2026-03-31 09:33:27', '2026-03-31 15:50:00', NULL, 7, 7000, 'keluar', NULL, 7, 'tamu'),
+(101, 12, 'F TSI 0UT', NULL, '2026-03-31 16:35:18', '2026-03-31 16:35:25', 1, 1, 2000, 'keluar', 12, 7, 'user'),
+(102, 10, 'B 6816 VRZ', NULL, '2026-03-31 16:36:13', NULL, NULL, 0, 0, 'masuk', 3, 7, 'user'),
+(103, 11, 'T 0WN 3NR', NULL, '2026-03-31 16:36:20', NULL, NULL, 0, 0, 'masuk', 9, 7, 'user'),
+(104, 9, 'B 6716 ARC', NULL, '2026-03-31 16:36:33', NULL, NULL, 0, 0, 'masuk', 2, 7, 'user');
 
 -- --------------------------------------------------------
 
@@ -257,10 +245,9 @@ INSERT INTO `tb_user` (`id_user`, `nama_lengkap`, `username`, `password`, `role`
 (2, 'UDIN', 'saha_maneh', '$2y$10$TdQznjjxRPRZwos3KZ2CfOmoUCYV53i2N6QbAFaahGO9wB2TXeheK', 'owner', 1),
 (3, 'TEST', 'test123', '$2y$10$jBVjqTr1c9CVnTGk/976TOX6MbTitoUtJcO.GfoJFKnkYRhKUyAu2', 'admin', 1),
 (4, 'SA\'ID', 'bisa_diandalkan', '$2y$10$x1fWuDXdGAE8DBakJUshZOJvx7NIIOA69o93OAOPxCAUmpI5et/oO', 'petugas', 1),
-(6, 'ANOMALI', 'decade010', '$2y$10$BVi0ajvJu1hCVA.1.cpbLulmOg.GoxMIcFIK83hIKprGrQqgo24eq', 'admin', 1),
-(7, 'Admin', 'admin', '$2y$10$EhXB2d5SLd4QP4dvFVLfL.V3jCbYPEcwsYutSxW9S7z4QVUQ6Nwkq', 'admin', 1),
 (8, 'Petugas', 'petugas#1', '$2y$10$sg4W5w4R7gnp.reCzYIMm.xb0zpqgixOSQIb2eaMN6CW1LFl.u9cq', 'petugas', 1),
-(9, 'Owner', 'pemilik#1', '$2y$10$wI4HSLqYInpNsHGXmAK2c.gSiJVBnCCKsZ6Jg97DPTxnf31SRNysK', 'owner', 1);
+(9, 'Owner', 'pemilik#1', '$2y$10$wI4HSLqYInpNsHGXmAK2c.gSiJVBnCCKsZ6Jg97DPTxnf31SRNysK', 'owner', 1),
+(12, 'Admin?', 'bukan_admin', '$2y$10$y.AN1vTXFa683sVbZ58rh.8uzFmdb6ddDuVLRTnu3ek0PF8j4VdMG', 'admin', 1);
 
 --
 -- Indexes for dumped tables
@@ -303,10 +290,10 @@ ALTER TABLE `tb_tarif`
 --
 ALTER TABLE `tb_transaksi`
   ADD PRIMARY KEY (`id_parkir`),
-  ADD KEY `fk_transaksi_kendaraan` (`id_kendaraan`),
   ADD KEY `fk_transaksi_tarif` (`id_tarif`),
   ADD KEY `fk_transaksi_user` (`id_user`),
-  ADD KEY `fk_transaksi_area` (`id_area`);
+  ADD KEY `fk_transaksi_area` (`id_area`),
+  ADD KEY `fk_transaksi_kendaraan` (`id_kendaraan`);
 
 --
 -- Indeks untuk tabel `tb_user`
@@ -323,19 +310,19 @@ ALTER TABLE `tb_user`
 -- AUTO_INCREMENT untuk tabel `tb_area_parkir`
 --
 ALTER TABLE `tb_area_parkir`
-  MODIFY `id_area` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id_area` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_kendaraan`
 --
 ALTER TABLE `tb_kendaraan`
-  MODIFY `id_kendaraan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_kendaraan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_log_aktivitas`
 --
 ALTER TABLE `tb_log_aktivitas`
-  MODIFY `id_log` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
+  MODIFY `id_log` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_tampilan`
@@ -347,13 +334,13 @@ ALTER TABLE `tb_tampilan`
 -- AUTO_INCREMENT untuk tabel `tb_transaksi`
 --
 ALTER TABLE `tb_transaksi`
-  MODIFY `id_parkir` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
+  MODIFY `id_parkir` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_user`
 --
 ALTER TABLE `tb_user`
-  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
@@ -363,20 +350,20 @@ ALTER TABLE `tb_user`
 -- Ketidakleluasaan untuk tabel `tb_kendaraan`
 --
 ALTER TABLE `tb_kendaraan`
-  ADD CONSTRAINT `fk_kendaraan_id_user` FOREIGN KEY (`id_user`) REFERENCES `tb_user` (`id_user`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_kendaraan_id_user` FOREIGN KEY (`id_user`) REFERENCES `tb_user` (`id_user`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `tb_log_aktivitas`
 --
 ALTER TABLE `tb_log_aktivitas`
-  ADD CONSTRAINT `fk_log_aktivitas_user` FOREIGN KEY (`id_user`) REFERENCES `tb_user` (`id_user`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_log_aktivitas_user` FOREIGN KEY (`id_user`) REFERENCES `tb_user` (`id_user`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `tb_transaksi`
 --
 ALTER TABLE `tb_transaksi`
   ADD CONSTRAINT `fk_transaksi_area` FOREIGN KEY (`id_area`) REFERENCES `tb_area_parkir` (`id_area`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_transaksi_kendaraan` FOREIGN KEY (`id_kendaraan`) REFERENCES `tb_kendaraan` (`id_kendaraan`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_transaksi_kendaraan` FOREIGN KEY (`id_kendaraan`) REFERENCES `tb_kendaraan` (`id_kendaraan`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_transaksi_tarif` FOREIGN KEY (`id_tarif`) REFERENCES `tb_tarif` (`id_tarif`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_transaksi_user` FOREIGN KEY (`id_user`) REFERENCES `tb_user` (`id_user`) ON UPDATE CASCADE;
 COMMIT;

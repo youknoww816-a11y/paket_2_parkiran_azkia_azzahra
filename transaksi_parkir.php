@@ -14,14 +14,13 @@ $data_tiket = null;
 $status_terakhir = null;
 
 /* ===============================
-   PROSES KELUAR PARKIR (FINAL FIX)
+   PROSES KELUAR PARKIR (FIX TOTAL)
    =============================== */
 
 if (isset($_GET['keluar'])) {
 
     $id_parkir = (int)$_GET['keluar'];
 
-    // 🔥 LEFT JOIN supaya guest tetap kebaca
     $qKeluar = $conn->query("
         SELECT 
             t.*,
@@ -40,7 +39,7 @@ if (isset($_GET['keluar'])) {
         LIMIT 1
     ");
 
-    if ($qKeluar->num_rows > 0) {
+    if ($qKeluar && $qKeluar->num_rows > 0) {
 
         $trx = $qKeluar->fetch_assoc();
 
@@ -50,11 +49,20 @@ if (isset($_GET['keluar'])) {
         $durasi = ceil(($waktu_keluar - $waktu_masuk) / 3600);
         if ($durasi < 1) $durasi = 1;
 
-        /* ===============================
-           AMBIL TARIF
-           =============================== */
+        // ================= CEK TAMU =================
+        $is_tamu = empty($trx['id_kendaraan']);
 
-        $tipe = $trx['tipe_kendaraan'] ?? 'motor';
+        $id_tarif = NULL;
+        $tarif_per_jam = 0;
+
+        // ================= AMBIL TARIF =================
+        // ================= AMBIL TARIF =================
+if (!$is_tamu) {
+
+    // PAKAI tipe_kendaraan (ENUM)
+    $tipe = $trx['tipe_kendaraan'] ?? null;
+
+    if ($tipe) {
 
         $qTarif = $conn->query("
             SELECT id_tarif, tarif_per_jam
@@ -63,64 +71,84 @@ if (isset($_GET['keluar'])) {
             LIMIT 1
         ");
 
-        $tarif = $qTarif->fetch_assoc();
+        if ($qTarif && $qTarif->num_rows > 0) {
+            $tarif = $qTarif->fetch_assoc();
 
-        $id_tarif = $tarif['id_tarif'];
-        $tarif_per_jam = $tarif['tarif_per_jam'];
+            $id_tarif = (int)$tarif['id_tarif'];
+            $tarif_per_jam = (int)$tarif['tarif_per_jam'];
 
-        $total = $durasi * $tarif_per_jam;
+        } else {
+            // BIAR KETAHUAN ERRORNYA
+            die("Tarif tidak ditemukan untuk tipe: " . $tipe);
+        }
+    }
+}
+        // ================= HITUNG TOTAL =================
+        if ($is_tamu) {
+
+            $total = 4000;
+
+            if ($durasi > 1) {
+                $tambahan = ceil(($durasi - 1) / 4) * 1500;
+                $total += $tambahan;
+            }
+
+        } else {
+
+            if ($durasi <= 24) {
+
+                $blok = ceil($durasi / 4);
+                $total = $blok * $tarif_per_jam;
+
+            } else {
+
+                $blok24 = ceil(24 / 4);
+                $harga_normal_24 = $blok24 * $tarif_per_jam;
+                $harga_diskon_24 = $harga_normal_24 * 0.25;
+
+                $sisa_jam = $durasi - 24;
+
+                $blok_sisa = ceil($sisa_jam / 5);
+                $harga_sisa = $blok_sisa * $tarif_per_jam;
+
+                $total = $harga_diskon_24 + $harga_sisa;
+            }
+        }
 
         $now = date('Y-m-d H:i:s');
 
-        /* ===============================
-           UPDATE TRANSAKSI
-           =============================== */
-
+        // ================= UPDATE =================
         $conn->query("
             UPDATE tb_transaksi
             SET
                 waktu_keluar = '$now',
-                id_tarif = $id_tarif,
+                id_tarif = " . ($id_tarif !== NULL ? $id_tarif : "NULL") . ",
                 durasi_jam = $durasi,
                 biaya_total = $total,
                 status = 'keluar'
             WHERE id_parkir = $id_parkir
         ");
 
-        /* ===============================
-            LOG AKTIVITAS KELUAR
-        =============================== */
-        
-        $aktivitas_keluar = "Keluar parkir - " .
-        ($trx['plat_kendaraan'] ?? $trx['plat_nomor']) .
-        " dari area " . $trx['nama_area'];
-        
+        // ================= LOG =================
+        $plat = $trx['plat_kendaraan'] ?? $trx['plat_nomor'] ?? $trx['plat_nomor_tamu'];
+
         $conn->query("
-            INSERT INTO tb_log_aktivitas (
-            id_user,
-            aktivitas,
-            waktu_aktivitas
-        ) VALUES (
-        " . ($trx['id_user'] ?: "NULL") . ",
-            '$aktivitas_keluar',
-            '$now'
-        )
+            INSERT INTO tb_log_aktivitas (id_user, aktivitas, waktu_aktivitas)
+            VALUES (
+                " . ($trx['id_user'] ?: "NULL") . ",
+                'Keluar parkir - $plat dari area {$trx['nama_area']}',
+                '$now'
+            )
         ");
 
-        /* ===============================
-           UPDATE AREA
-           =============================== */
-
+        // ================= UPDATE AREA =================
         $conn->query("
             UPDATE tb_area_parkir
             SET terisi = terisi - 1
             WHERE id_area = {$trx['id_area']}
         ");
 
-        /* ===============================
-           DATA TIKET
-           =============================== */
-
+        // ================= DATA TIKET =================
         $data_tiket = [
             'mode' => 'KELUAR',
             'waktu_masuk' => $trx['waktu_masuk'],
@@ -128,11 +156,10 @@ if (isset($_GET['keluar'])) {
             'durasi' => $durasi,
             'total' => $total,
             'kendaraan' => [
-                'plat_nomor' => $trx['plat_kendaraan'] ?? $trx['plat_nomor'],
+                'plat_nomor' => $plat,
                 'nama_lengkap' => $trx['nama_lengkap'] ?? 'Pengunjung',
                 'username' => $trx['username'] ?? '-',
-                'jenis_kendaraan' => $trx['jenis_kendaraan'] ?? '-',
-                'tipe_kendaraan' => $trx['tipe_kendaraan'] ?? '-'
+                'jenis_kendaraan' => $trx['jenis_kendaraan'] ?? '-'
             ],
             'area' => [
                 'nama_area' => $trx['nama_area']
@@ -220,8 +247,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($username !== '' || $plat !== ''))
                 'id_kendaraan'   => null,
                 'id_user'        => null,
                 'plat_nomor'     => $plat,
-                'jenis_kendaraan'=> 'motor',
-                'tipe_kendaraan' => 'umum',
+                'jenis_kendaraan'=> null,
+                'tipe_kendaraan' => null,
                 'nama_lengkap'   => 'Pengunjung'
             ];
         }
@@ -231,7 +258,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($username !== '' || $plat !== ''))
 
         $id_kendaraan = (int)($kendaraan['id_kendaraan'] ?? 0);
         $id_user      = (int)($kendaraan['id_user'] ?? 0);
-        $plat_db      = $kendaraan['plat_nomor'] ?: $plat;
+        
+        $is_tamu = empty($kendaraan['id_kendaraan']);
+        $plat_user = null;
+        $plat_tamu = null;
+        $jenis_transaksi = 'user';
+        
+        if ($is_tamu) {
+            $plat_tamu = $plat;
+            $jenis_transaksi = 'tamu';
+        
+        } else {
+            $plat_user = $kendaraan['plat_nomor'];
+        }
 
         $status_terakhir = null;
         if ($id_kendaraan > 0) {
@@ -295,27 +334,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($username !== '' || $plat !== ''))
                 INSERT TRANSAKSI MASUK 
                =============================== */
                
-               $stmtInsert = $conn->prepare("
-                    INSERT INTO tb_transaksi (
-                    id_kendaraan,
-                    plat_nomor,
-                    waktu_masuk,
-                    status,
-                    id_user,
-                    id_area
-                ) VALUES (?, ?, ?, 'masuk', ?, ?)
+            $stmtInsert = $conn->prepare("
+               INSERT INTO tb_transaksi (
+               id_kendaraan,
+               plat_nomor,
+               plat_nomor_tamu,
+               waktu_masuk,
+               status,
+               id_user,
+               id_area,
+               jenis_transaksi
+               ) VALUES (?, ?, ?, ?, 'masuk', ?, ?, ?)
                 ");
                 
                 $idK = $id_kendaraan ?: null;
                 $idU = $id_user ?: null;
                 
                 $stmtInsert->bind_param(
-                    "issii",
+                    "isssiis",
                     $idK,
-                    $plat_db,
+                    $plat_user,
+                    $plat_tamu,
                     $now,
                     $idU,
-                    $id_area
+                    $id_area,
+                    $jenis_transaksi
                 );
                 
                 if (!$stmtInsert->execute()) {
@@ -326,7 +369,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($username !== '' || $plat !== ''))
                 $stmtInsert->close();
             
             $id_transaksi_baru = $conn->insert_id;
-            $aktivitas = "Masuk parkir - $plat_db di area $nama_area";
+            
+            $plat_log = $plat_user ?? $plat_tamu;
+            $aktivitas = "Masuk parkir - $plat_log di area $nama_area";
             
             $conn->query("
                 INSERT INTO tb_log_aktivitas (
@@ -372,7 +417,7 @@ $data_parkir = $conn->query("
     SELECT  
         t.id_parkir,
         t.waktu_masuk,
-        COALESCE(k.plat_nomor, t.plat_nomor) AS plat_nomor,
+        COALESCE(k.plat_nomor, t.plat_nomor, t.plat_nomor_tamu) AS plat_nomor,
         u.nama_lengkap,
         u.username
     FROM tb_transaksi t
