@@ -10,29 +10,27 @@ include 'proteksi_role_parkir.php';
    1. FILTER TANGGAL
 ================================ */
 
-// Default: bulan berjalan
-$currentMonth = date('Y-m');
-$month = $_GET['month'] ?? $currentMonth;
+if (!empty($_GET['start_date']) && !empty($_GET['end_date'])) {
 
-$start_date = $_GET['start_date'] ?? ($month . '-01');
-$end_date   = $_GET['end_date'] ?? date('Y-m-t', strtotime($start_date));
+    $start_date = $_GET['start_date'];
+    $end_date   = $_GET['end_date'];
+
+} elseif (!empty($_GET['month'])) {
+
+    $start_date = date('Y-m-01', strtotime($_GET['month']));
+    $end_date   = date('Y-m-t', strtotime($_GET['month']));
+
+} else {
+
+    $start_date = date('Y-m-01');
+    $end_date   = date('Y-m-t');
+}
 
 $start_datetime = $start_date . ' 00:00:00';
 $end_datetime   = $end_date . ' 23:59:59';
 
-// Default: bulan ini
-$current_month_year = date('Y-m');
-
-// Default tanggal bulan ini
-$start_date_month = date('Y-m-01');
-$end_date_month   = date('Y-m-t');
-
-// ================== HANDLE FILTER ==================
-if (isset($_GET['month']) && $_GET['month'] !== '') {
-    $current_month_year = $_GET['month'];
-    $start_date_month = date('Y-m-01', strtotime($current_month_year));
-    $end_date_month   = date('Y-m-t', strtotime($current_month_year));
-}
+$start_date_month = $start_date;
+$end_date_month   = $end_date;
 
 // Kalau user pakai custom range
 if (!empty($_GET['start_date']) && !empty($_GET['end_date'])) {
@@ -343,13 +341,16 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
             <td style="white-space: pre-line;"><?= htmlspecialchars($row['aktivitas']) ?></td>
             <td>Rp <?= number_format($tarif, 0, ',', '.') ?></td>
             <td><?php if ($row['status'] === 'keluar'): ?>Rp <?= number_format($row['biaya_total'], 0, ',', '.') ?><?php else: ?><em>Kendaraan masih terparkir</em><?php endif; ?></td>
-            <td><?= $durasi ?> jam</td><td><?= htmlspecialchars($row['nama_area']) ?></td>
+            <td><?= $durasi ?> jam</td>
+            <td><?= htmlspecialchars($row['nama_area']) ?></td>
+            
         </tr>
 
     <?php endwhile; ?>
 
     <?php else: ?>
         <tr>
+            <td></td>
             <td></td>
             <td></td>
             <td></td>
@@ -365,8 +366,8 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
         </tr>
     <?php endif; ?>
 
-                    </tbody>
-                </table>
+        </tbody>
+    </table>
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
@@ -410,8 +411,8 @@ document.addEventListener('DOMContentLoaded', function () {
             switch (type) {
                 case "username":   text = row.cells[0].innerText; break;
                 case "pemilik":    text = row.cells[1].innerText; break;
+                case "plat_nomor": text = row.cells[2].innerText; break;
                 case "jenis":      text = row.cells[3].innerText; break;
-                case "plat_nomor": text = row.cells[4].innerText; break;
                 case "warna":      text = row.cells[5].innerText; break;
                 default:
                     row.style.display = "";
@@ -434,7 +435,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const filter = this.dataset.sort;
 
             rows.forEach(row => {
-                const tipe = row.cells[2].innerText.toLowerCase();
+                const tipe = row.cells[3].innerText.toLowerCase();
                 
                 if (filter === "manual") {
                     row.style.display = (tipe === "manual") ? "" : "none";

@@ -49,41 +49,45 @@ if (isset($_GET['keluar'])) {
         $durasi = ceil(($waktu_keluar - $waktu_masuk) / 3600);
         if ($durasi < 1) $durasi = 1;
 
+        $selisih_detik = $waktu_keluar - $waktu_masuk;
+        
+        $jam = floor($selisih_detik / 3600);
+        $menit = floor(($selisih_detik % 3600) / 60);
+        
+        $durasi_detail = $jam . ' jam ' . $menit . ' menit';
+
         // ================= CEK TAMU =================
         $is_tamu = empty($trx['id_kendaraan']);
 
         $id_tarif = NULL;
         $tarif_per_jam = 0;
+        
+        if (!$is_tamu) {
 
-        // ================= AMBIL TARIF =================
-        // ================= AMBIL TARIF =================
-if (!$is_tamu) {
-
-    // PAKAI tipe_kendaraan (ENUM)
     $tipe = $trx['tipe_kendaraan'] ?? null;
+    $qTarif = null;
 
-    if ($tipe) {
+    if ($qTarif && $qTarif->num_rows > 0) {
+        $tarif = $qTarif->fetch_assoc();
 
-        $qTarif = $conn->query("
-            SELECT id_tarif, tarif_per_jam
-            FROM tb_tarif
-            WHERE jenis_kendaraan = '$tipe'
-            LIMIT 1
-        ");
+        $id_tarif = (int)$tarif['id_tarif'];
+        $tarif_per_jam = (int)$tarif['tarif_per_jam'];
 
-        if ($qTarif && $qTarif->num_rows > 0) {
-            $tarif = $qTarif->fetch_assoc();
-
-            $id_tarif = (int)$tarif['id_tarif'];
-            $tarif_per_jam = (int)$tarif['tarif_per_jam'];
-
-        } else {
-            // BIAR KETAHUAN ERRORNYA
-            die("Tarif tidak ditemukan untuk tipe: " . $tipe);
-        }
+    } else {
+        die("Tarif tidak ditemukan untuk tipe: " . $tipe);
     }
-}
-        // ================= HITUNG TOTAL =================
+
+        $tarif = $qTarif->fetch_assoc();
+
+        $id_tarif = (int)$tarif['id_tarif'];
+        $tarif_per_jam = (int)$tarif['tarif_per_jam'];
+
+    } else {
+
+        die("Tarif tidak ditemukan untuk tipe: " . $tipe);
+    }
+
+    // ================= HITUNG TOTAL =================
         if ($is_tamu) {
 
             $total = 4000;
@@ -154,6 +158,7 @@ if (!$is_tamu) {
             'waktu_masuk' => $trx['waktu_masuk'],
             'waktu_keluar' => $now,
             'durasi' => $durasi,
+            'durasi_detail' => $durasi_detail,
             'total' => $total,
             'kendaraan' => [
                 'plat_nomor' => $plat,
@@ -308,19 +313,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($username !== '' || $plat !== ''))
 
     } else {
 
-        // Baru cari area yang masih ada slot
+        $tipe_kendaraan = $kendaraan['tipe_kendaraan'] ?? 'motor';
+
         $qArea = $conn->query("
             SELECT id_area, nama_area
             FROM tb_area_parkir
             WHERE terisi < kapasitas
             AND status_area_parkir != 'ditutup'
+            AND LOWER(tipe_kendaraan) = LOWER('$tipe_kendaraan')
             LIMIT 1
         ");
 
         if ($qArea->num_rows == 0) {
 
+    $cekTipe = $conn->query("
+        SELECT id_area 
+        FROM tb_area_parkir
+        WHERE LOWER(tipe_kendaraan) = LOWER('$tipe_kendaraan')
+    ");
+
+    if ($cekTipe->num_rows == 0) {
+        $message = "Tidak ada area untuk tipe kendaraan ini.";
+    
+    } else {
+
+        $cekBuka = $conn->query("
+            SELECT id_area 
+            FROM tb_area_parkir
+            WHERE LOWER(tipe_kendaraan) = LOWER('$tipe_kendaraan')
+            AND status_area_parkir != 'ditutup'
+        ");
+
+        if ($cekBuka->num_rows == 0) {
+            $message = "Area parkir untuk kendaraan ini sedang ditutup.";
+        
+        } else {
             $message = "Area parkir penuh.";
-            $message_type = "error";
+        }
+    }
+
+    $message_type = "error";
 
             } else {
 
@@ -365,10 +397,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($username !== '' || $plat !== ''))
                     die("Gagal menyimpan transaksi masuk: " . $stmtInsert->error);
                 }
 
-                $id_transaksi_baru = $stmtInsert->insert_id;
-                $stmtInsert->close();
-            
-            $id_transaksi_baru = $conn->insert_id;
+            $id_transaksi_baru = $stmtInsert->insert_id;
+            $stmtInsert->close();
             
             $plat_log = $plat_user ?? $plat_tamu;
             $aktivitas = "Masuk parkir - $plat_log di area $nama_area";
@@ -571,7 +601,7 @@ if (empty($data_tiket) && isset($_SESSION['tiket_terakhir'])) {
             <p><strong>Status:</strong> Keluar Parkir</p>
             <p><strong>Waktu Masuk:</strong> <?= $data_tiket['waktu_masuk'] ?></p>
             <p><strong>Waktu Keluar:</strong> <?= $data_tiket['waktu_keluar'] ?></p>
-            <p><strong>Durasi:</strong> <?= $data_tiket['durasi'] ?> jam</p>
+            <p><strong>Durasi:</strong> <?= $data_tiket['durasi_detail'] ?> </p>
             <p><strong>Total Bayar:</strong> Rp <?= number_format($data_tiket['total'],0,',','.') ?></p>
         <?php endif; ?>
     </div>
@@ -722,4 +752,3 @@ function printTiket() {
 
 </body>
 </html>
-
