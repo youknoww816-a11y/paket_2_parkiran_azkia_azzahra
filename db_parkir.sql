@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 01 Apr 2026 pada 03.38
+-- Waktu pembuatan: 02 Apr 2026 pada 02.40
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -41,10 +41,9 @@ CREATE TABLE `tb_area_parkir` (
 --
 
 INSERT INTO `tb_area_parkir` (`id_area`, `nama_area`, `tipe_kendaraan`, `kapasitas`, `terisi`, `status_area_parkir`) VALUES
-(7, '2MB', 'motor', 45, 9, 'tempat kosong masih tersedia'),
-(17, '1MA', 'motor', 50, 0, 'tempat kosong masih tersedia'),
-(26, '1CA', 'mobil', 17, 0, 'ditutup'),
-(27, '1OB', 'lainnya', 10, 0, 'tempat kosong masih tersedia');
+(17, '1MA', 'motor', 50, 4, 'tempat kosong masih tersedia'),
+(26, '1CA', 'mobil', 17, 0, 'tempat kosong masih tersedia'),
+(27, '1OB', 'lainnya', 10, 2, 'tempat kosong masih tersedia');
 
 -- --------------------------------------------------------
 
@@ -71,7 +70,9 @@ INSERT INTO `tb_kendaraan` (`id_kendaraan`, `plat_nomor`, `tipe_kendaraan`, `jen
 (9, 'B 6716 ARC', 'lainnya', 'Van', 'Putih', 'UDIN', 2),
 (10, 'B 6816 VRZ', 'mobil', 'Mobil Toyota', 'Hitam', 'TEST', 3),
 (11, 'T 0WN 3NR', 'motor', 'Motor Yamaha', 'Biru', 'Owner', 9),
-(12, 'F TSI 0UT', 'motor', 'Motor Honda', 'Magenta', 'Admin?', 12);
+(12, 'F TSI 0UT', 'motor', 'Motor Honda', 'Magenta', 'Admin?', 12),
+(13, 'A ZKL 7BF', 'mobil', 'Mobil Toyota', 'Biru', 'Petugas', 8),
+(14, 'N AHU M4N', 'lainnya', '85 70 79', 'Chrome', 'Manusia', 13);
 
 -- --------------------------------------------------------
 
@@ -145,7 +146,20 @@ INSERT INTO `tb_log_aktivitas` (`id_log`, `id_user`, `aktivitas`, `waktu_aktivit
 (130, 4, 'Masuk parkir - B 6716 VRZ di area 2MB', '2026-04-01 08:23:12'),
 (131, NULL, 'Keluar parkir - X dari area 2MB', '2026-04-01 08:28:14'),
 (132, 2, 'Masuk parkir - B 6716 ARC di area 2MB', '2026-04-01 08:28:39'),
-(133, 12, 'Masuk parkir - F TSI 0UT di area 2MB', '2026-04-01 08:28:48');
+(133, 12, 'Masuk parkir - F TSI 0UT di area 2MB', '2026-04-01 08:28:48'),
+(134, 2, 'Keluar parkir - B 6716 ARC dari area 2MB', '2026-04-01 08:47:25'),
+(135, 2, 'Masuk parkir - B 6716 ARC di area 1OB', '2026-04-01 09:29:37'),
+(136, 9, 'Masuk parkir - T 0WN 3NR di area 2MB', '2026-04-01 09:32:21'),
+(137, 2, 'Masuk parkir - B 6716 ARC di area 1OB', '2026-04-01 09:32:28'),
+(138, 12, 'Masuk parkir - F TSI 0UT di area 2MB', '2026-04-01 09:32:36'),
+(139, 4, 'Masuk parkir - B 6716 VRZ di area 2MB', '2026-04-01 09:32:50'),
+(140, NULL, 'Masuk parkir - F di area 2MB', '2026-04-01 09:34:41'),
+(141, 2, 'Masuk parkir - B 6716 ARC di area 1OB', '2026-04-01 09:48:07'),
+(142, 9, 'Masuk parkir - T 0WN 3NR di area 1MA', '2026-04-01 09:48:40'),
+(143, 12, 'Masuk parkir - F TSI 0UT di area 1MA', '2026-04-01 09:49:15'),
+(144, NULL, 'Masuk parkir - K di area 1MA', '2026-04-01 09:49:22'),
+(145, NULL, 'Masuk parkir - L di area 1MA', '2026-04-01 09:49:32'),
+(146, 13, 'Masuk parkir - N AHU M4N di area 1OB', '2026-04-01 10:06:24');
 
 -- --------------------------------------------------------
 
@@ -217,21 +231,12 @@ CREATE TABLE `tb_transaksi` (
 --
 
 INSERT INTO `tb_transaksi` (`id_parkir`, `id_kendaraan`, `plat_nomor`, `plat_nomor_tamu`, `waktu_masuk`, `waktu_keluar`, `id_tarif`, `durasi_jam`, `biaya_total`, `status`, `id_user`, `id_area`, `jenis_transaksi`) VALUES
-(91, NULL, NULL, 'N', '2026-03-31 07:07:39', NULL, NULL, 0, 0, 'masuk', NULL, 7, 'tamu'),
-(93, NULL, NULL, 'X', '2026-03-31 07:31:07', '2026-04-01 08:28:14', NULL, 25, 13000, 'keluar', NULL, 7, 'tamu'),
-(96, 9, 'B 6716 ARC', NULL, '2026-03-31 08:55:18', '2026-03-31 16:36:00', 3, 8, 12000, 'keluar', 2, 7, 'user'),
-(97, 6, 'B 6716 VRZ', NULL, '2026-03-31 08:55:26', '2026-03-31 16:36:05', 1, 8, 4000, 'keluar', 4, 7, 'user'),
-(98, 10, 'B 6816 VRZ', NULL, '2026-03-31 08:55:38', '2026-03-31 16:35:36', 2, 8, 10000, 'keluar', 3, 7, 'user'),
-(99, 12, 'F TSI 0UT', NULL, '2026-03-31 09:33:20', '2026-03-31 16:24:09', NULL, 7, 0, 'keluar', 12, 7, 'user'),
-(100, NULL, NULL, 'K', '2026-03-31 09:33:27', '2026-03-31 15:50:00', NULL, 7, 7000, 'keluar', NULL, 7, 'tamu'),
-(101, 12, 'F TSI 0UT', NULL, '2026-03-31 16:35:18', '2026-03-31 16:35:25', 1, 1, 2000, 'keluar', 12, 7, 'user'),
-(102, 10, 'B 6816 VRZ', NULL, '2026-03-31 16:36:13', NULL, NULL, 0, 0, 'masuk', 3, 7, 'user'),
-(103, 11, 'T 0WN 3NR', NULL, '2026-03-31 16:36:20', NULL, NULL, 0, 0, 'masuk', 9, 7, 'user'),
-(104, 9, 'B 6716 ARC', NULL, '2026-03-31 16:36:33', '2026-04-01 08:22:44', 3, 16, 24000, 'keluar', 2, 7, 'user'),
-(105, NULL, NULL, 'M', '2026-04-01 08:05:04', '2026-04-01 08:05:11', NULL, 1, 4000, 'keluar', NULL, 7, 'tamu'),
-(106, 6, 'B 6716 VRZ', NULL, '2026-04-01 08:23:12', NULL, NULL, 0, 0, 'masuk', 4, 7, 'user'),
-(107, 9, 'B 6716 ARC', NULL, '2026-04-01 08:28:39', NULL, NULL, 0, 0, 'masuk', 2, 7, 'user'),
-(108, 12, 'F TSI 0UT', NULL, '2026-04-01 08:28:48', NULL, NULL, 0, 0, 'masuk', 12, 7, 'user');
+(115, 9, 'B 6716 ARC', NULL, '2026-04-01 09:48:07', NULL, NULL, 0, 0, 'masuk', 2, 27, 'user'),
+(116, 11, 'T 0WN 3NR', NULL, '2026-04-01 09:48:40', NULL, NULL, 0, 0, 'masuk', 9, 17, 'user'),
+(117, 12, 'F TSI 0UT', NULL, '2026-04-01 09:49:15', NULL, NULL, 0, 0, 'masuk', 12, 17, 'user'),
+(118, NULL, NULL, 'K', '2026-04-01 09:49:22', NULL, NULL, 0, 0, 'masuk', NULL, 17, 'tamu'),
+(119, NULL, NULL, 'L', '2026-04-01 09:49:32', NULL, NULL, 0, 0, 'masuk', NULL, 17, 'tamu'),
+(120, 14, 'N AHU M4N', NULL, '2026-04-01 10:06:24', NULL, NULL, 0, 0, 'masuk', 13, 27, 'user');
 
 -- --------------------------------------------------------
 
@@ -258,7 +263,8 @@ INSERT INTO `tb_user` (`id_user`, `nama_lengkap`, `username`, `password`, `role`
 (4, 'SA\'ID', 'bisa_diandalkan', '$2y$10$x1fWuDXdGAE8DBakJUshZOJvx7NIIOA69o93OAOPxCAUmpI5et/oO', 'petugas', 1),
 (8, 'Petugas', 'petugas#1', '$2y$10$sg4W5w4R7gnp.reCzYIMm.xb0zpqgixOSQIb2eaMN6CW1LFl.u9cq', 'petugas', 1),
 (9, 'Owner', 'pemilik#1', '$2y$10$wI4HSLqYInpNsHGXmAK2c.gSiJVBnCCKsZ6Jg97DPTxnf31SRNysK', 'owner', 1),
-(12, 'Admin?', 'bukan_admin', '$2y$10$y.AN1vTXFa683sVbZ58rh.8uzFmdb6ddDuVLRTnu3ek0PF8j4VdMG', 'admin', 1);
+(12, 'Admin?', 'bukan_admin', '$2y$10$y.AN1vTXFa683sVbZ58rh.8uzFmdb6ddDuVLRTnu3ek0PF8j4VdMG', 'admin', 1),
+(13, 'Manusia', 'definitelyhuman', '$2y$10$Ecg2pyHsYrNNICIQkl1lCeJsJ7PNYvFZI6Ts20qg0Je.EkrF0dGXK', 'owner', 1);
 
 --
 -- Indexes for dumped tables
@@ -327,13 +333,13 @@ ALTER TABLE `tb_area_parkir`
 -- AUTO_INCREMENT untuk tabel `tb_kendaraan`
 --
 ALTER TABLE `tb_kendaraan`
-  MODIFY `id_kendaraan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_kendaraan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_log_aktivitas`
 --
 ALTER TABLE `tb_log_aktivitas`
-  MODIFY `id_log` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=134;
+  MODIFY `id_log` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=147;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_tampilan`
@@ -345,13 +351,13 @@ ALTER TABLE `tb_tampilan`
 -- AUTO_INCREMENT untuk tabel `tb_transaksi`
 --
 ALTER TABLE `tb_transaksi`
-  MODIFY `id_parkir` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=109;
+  MODIFY `id_parkir` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_user`
 --
 ALTER TABLE `tb_user`
-  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)

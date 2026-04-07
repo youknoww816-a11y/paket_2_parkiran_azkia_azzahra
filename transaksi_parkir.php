@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 date_default_timezone_set('Asia/Jakarta');
 
@@ -59,33 +62,37 @@ if (isset($_GET['keluar'])) {
         // ================= CEK TAMU =================
         $is_tamu = empty($trx['id_kendaraan']);
 
+       $id_tarif = NULL;
+       $tarif_per_jam = 0;
+
+       if (!$is_tamu) {
+
+    $tipe = $trx['tipe_kendaraan'] ?? '';
+
+    if (empty($tipe)) {
+        die("Error: tipe_kendaraan kosong!");
+    }
+
+    $qTarif = $conn->query("
+    SELECT id_tarif, tarif_per_jam 
+    FROM tb_tarif 
+    WHERE jenis_kendaraan = '$tipe'
+    LIMIT 1
+");
+
+if (!$qTarif) {
+    die("Query tarif error: " . $conn->error);
+}
+
+if ($qTarif->num_rows > 0) {
+    $tarif = $qTarif->fetch_assoc();
+    $id_tarif = (int)$tarif['id_tarif'];
+    $tarif_per_jam = (int)$tarif['tarif_per_jam'];
+
+    } else {
         $id_tarif = NULL;
-        $tarif_per_jam = 0;
-        
-        if (!$is_tamu) {
-
-    $tipe = $trx['tipe_kendaraan'] ?? null;
-    $qTarif = null;
-
-    if ($qTarif && $qTarif->num_rows > 0) {
-        $tarif = $qTarif->fetch_assoc();
-
-        $id_tarif = (int)$tarif['id_tarif'];
-        $tarif_per_jam = (int)$tarif['tarif_per_jam'];
-
-    } else {
-        die("Tarif tidak ditemukan untuk tipe: " . $tipe);
     }
-
-        $tarif = $qTarif->fetch_assoc();
-
-        $id_tarif = (int)$tarif['id_tarif'];
-        $tarif_per_jam = (int)$tarif['tarif_per_jam'];
-
-    } else {
-
-        die("Tarif tidak ditemukan untuk tipe: " . $tipe);
-    }
+}
 
     // ================= HITUNG TOTAL =================
         if ($is_tamu) {
@@ -164,7 +171,7 @@ if (isset($_GET['keluar'])) {
                 'plat_nomor' => $plat,
                 'nama_lengkap' => $trx['nama_lengkap'] ?? 'Pengunjung',
                 'username' => $trx['username'] ?? '-',
-                'jenis_kendaraan' => $trx['jenis_kendaraan'] ?? '-'
+                'tipe_kendaraan' => $trx['tipe_kendaraan'] ?? '-'
             ],
             'area' => [
                 'nama_area' => $trx['nama_area']
@@ -177,6 +184,7 @@ if (isset($_GET['keluar'])) {
         $message_type = "success";
     }
 }
+
 
 /* ===============================
    AMBIL USER UNTUK DROPDOWN
