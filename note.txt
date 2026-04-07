@@ -1,0 +1,13 @@
+Note :
+
+User Admin =
+username : bukan_admin
+password : rwq1
+
+User Pertugas = 
+username : petugas#1
+password : security
+
+User Owner =
+username : pemilik#1
+password : owner
