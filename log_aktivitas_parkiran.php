@@ -66,7 +66,7 @@ END AS nama_lengkap,
     COALESCE(k.plat_nomor, t.plat_nomor, t.plat_nomor_tamu) AS plat_nomor,
 
     CASE 
-    WHEN t.id_kendaraan IS NULL THEN ''
+    WHEN t.id_kendaraan IS NULL THEN 'manual'
     ELSE k.tipe_kendaraan
 END AS tipe_kendaraan,
 
@@ -222,13 +222,18 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
     </form>
 </div>
 
+<?php if ($_SESSION['role'] !== 'owner'): ?>
+
 <h3 class>Ringkasan (<?php echo date('d F Y',strtotime($start_date_month)).' s/d '.date('d F Y',strtotime($end_date_month)); ?>)</h3>
+
 <div class="report-summary-cards">
     <div class="summary-card"><h4>Total Kendaraan Masuk</h4><p><?php echo $g_total_kendaraan_masuk;?> </p></div>
     <div class="summary-card"><h4>Total Kendaraan Keluar</h4><p><?php echo $g_total_kendaraan_keluar;?> </p></div>
     <div class="summary-card"><h4>Total Kendaraan Yang Masih Terparkir</h4><p><?php echo $g_total_kendaraan_terparkir;?></p></div>
-    <div class="summary-card"><h4>Total Transaksi</h4><p>Rp <?= number_format($g_total_transaksi, 0, ',', '.') ?></p></div> <!-- Ini untuk kalau total rupiah dari semua kendaraan yang telah bayar keluar parkir bulan ini -->
+    <div class="summary-card"><h4>Total Transaksi</h4><p>Rp <?= number_format($g_total_transaksi, 0, ',', '.') ?></p></div>
 </div>
+
+<?php endif; ?>
 
 </div>
 
@@ -294,18 +299,35 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
 <?php if ($result_aktivitas && $result_aktivitas->num_rows > 0): ?>
     <?php while ($row = $result_aktivitas->fetch_assoc()): ?>
 
-        <?php
-    // Hitung durasi realtime kalau masih parkir
-       
+    <?php
+    
         $masuk = strtotime($row['waktu_masuk']);
-        $now   = time();
+        $keluar = $row['waktu_keluar'] ? strtotime($row['waktu_keluar']) : time();
         
-        $durasi = ceil(($now - $masuk) / 3600);
-        if ($durasi < 1) $durasi = 1;
+        $selisih = $keluar - $masuk;
         
-        else {
-            $durasi = $row['durasi_jam'];
+        $hari  = floor($selisih / 86400);
+        $jam   = floor(($selisih % 86400) / 3600);
+        $menit = floor(($selisih % 3600) / 60);
+        
+        $durasi = '';
+        
+        if ($hari > 0) {
+            $durasi .= $hari . ' hari ';
         }
+        
+        if ($jam > 0) {
+            $durasi .= $jam . ' jam ';
+        }
+        
+        if ($menit > 0) {
+            $durasi .= $menit . ' menit';
+        }
+        
+        if ($durasi === '') {
+            $durasi = '0 menit';
+        }
+
         ?>
 
         <?php
@@ -341,7 +363,7 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
             <td style="white-space: pre-line;"><?= htmlspecialchars($row['aktivitas']) ?></td>
             <td>Rp <?= number_format($tarif, 0, ',', '.') ?></td>
             <td><?php if ($row['status'] === 'keluar'): ?>Rp <?= number_format($row['biaya_total'], 0, ',', '.') ?><?php else: ?><em>Kendaraan masih terparkir</em><?php endif; ?></td>
-            <td><?= $durasi ?> jam</td>
+            <td><?= $durasi ?></td>
             <td><?= htmlspecialchars($row['nama_area']) ?></td>
             
         </tr>
