@@ -8,10 +8,10 @@ include 'koneksi_parkir.php';
 include 'proteksi_role_parkir.php';
 
 /* ======================================
-   ACTIVE PAGE HANDLING (FIX & STABIL)
+            ACTIVE PAGE HANDLING 
    ====================================== */
 
-// AMBIL NAMA FILE AKTIF TANPA .php
+// Ambil nama file aktif, untuk tampilan menu
 $current_page = basename($_SERVER['PHP_SELF'], '.php');
 ?>
 

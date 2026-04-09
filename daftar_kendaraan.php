@@ -17,7 +17,7 @@ $id_user = '';
 
 $form_action = 'add';
 
-/* ===================== DELETE ===================== */
+/* ===================== HAPUS KENDARAAN ===================== */
 if (isset($_GET['action']) && $_GET['action'] === 'delete') {
     $id = intval($_GET['id']);
 
@@ -29,7 +29,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete') {
     exit();
 }
 
-/* ===================== EDIT LOAD ===================== */
+/* ===================== EDIT DATA KENDARAAN ===================== */
 if (isset($_GET['action']) && $_GET['action'] === 'edit') {
     $id = intval($_GET['id']);
 
@@ -50,7 +50,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit') {
     }
 }
 
-/* ===================== SIMPAN ===================== */
+/* ================ MENAMBAH DATA KENDARAAN ================ */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $id_kendaraan     = intval($_POST['id_kendaraan'] ?? 0);
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_user          = intval($_POST['id_user']);
     $form_action      = $_POST['form_action'];
 
-    /* Ambil nama pemilik otomatis */
+    /* Data perlu diambil berdasarkan pengguna yang sudah terdaftar */
     if ($pemilik === '') {
         $q = $conn->prepare("SELECT nama_lengkap FROM tb_user WHERE id_user = ?");
         $q->bind_param("i", $id_user);
@@ -186,7 +186,7 @@ $data_kendaraan = $conn->query("
                 </div>
                 <?php endif; ?>
 
-    <hr>
+        <hr>
             <table>
                 <tr>
                     <th>ID</th>
@@ -377,7 +377,7 @@ document.getElementById('searchBox').addEventListener('keyup', function () {
 
 
 <!-- Searchbar atau Searchbox. . . Apa bedanya?
-    Searchbar itu bar tampilan untuk input, Searchbox untuk input apa yang di cara -->
+    Searchbar itu bar tampilan untuk input, Searchbox untuk input apa yang di cari -->
 <script>
 const searchType = document.getElementById('searchType');
 const searchBox = document.getElementById('searchBox');

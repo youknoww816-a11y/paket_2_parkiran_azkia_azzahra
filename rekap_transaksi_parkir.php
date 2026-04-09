@@ -7,7 +7,7 @@ include 'koneksi_parkir.php';
 include 'proteksi_role_parkir.php';
 
 /* ===============================
-   1. VALIDASI LOGIN & ROLE
+     VALIDASI LOGIN & ROLE
 ================================ */
 
 if (!isset($_SESSION['id_user'])) {
@@ -39,8 +39,11 @@ if ($userData['role'] !== 'owner') {
 }
 
 /* ===============================
-   2. FILTER TANGGAL (OPTIONAL)
+   FILTER TANGGAL (PLACEHOLDER YANG TIDAK TERPAKAI)
 ================================ */
+
+/* Note : Awalnya aku kira bakal perlu ini, tapi karena pengguna owner bisa melihat halaman log_aktivitas_parkir.php 
+          dimana itu udah ada filter tanggal, sortir data, cari, dll jadi bagian ini enggak berguna*/
 
 $start_date = $_GET['start_date'] ?? null;
 $end_date   = $_GET['end_date'] ?? null;
@@ -57,8 +60,8 @@ if ($start_date && $end_date) {
 }
 
 /* ===============================
-   3. QUERY UTAMA
-   ❗ DURASI & TARIF BERSUMBER DARI tb_transaksi
+        QUERY DURASI & TARIF
+    BERSUMBER DARI tb_transaksi
 ================================ */
 
 /* Note : Awalnya aku mau pake data dari tb_log_aktivitas,tapi karena buru-buru jadi pake data dari tb_transaksi
@@ -98,8 +101,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 /* ===============================
-   4. GROUP DATA PER TANGGAL
-   ❗ TIDAK ADA HITUNG REALTIME
+    GROUP DATA PER TANGGAL
 ================================ */
 
 $rekap_per_tanggal = [];
@@ -108,7 +110,7 @@ while ($row = $result->fetch_assoc()) {
 
     $tanggal = date('Y-m-d', strtotime($row['waktu_masuk']));
 
-    // ✅ DURASI HANYA JIKA SUDAH KELUAR
+    // Keluar
     if ($row['status'] === 'keluar') {
         $durasi = (int)$row['durasi_jam'];
         $biaya  = (int)$row['biaya_total'];

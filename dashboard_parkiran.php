@@ -39,8 +39,8 @@ if ($conn && !$conn->connect_error) {
 
     /* ============================
        KENDARAAN MASIH TERPARKIR
-       TERMASUK GUEST (INPUT PLAT NOMOR)
-       SUMBER: tb_transaksi + tb_area_parkir
+       TERMASUK TAMU (INPUT PLAT NOMOR)
+       SUMBER: dari database, tb_transaksi dan tb_area_parkir
        ============================ */
 
     $sql = "

@@ -17,7 +17,7 @@ $data_tiket = null;
 $status_terakhir = null;
 
 /* ===============================
-   PROSES KELUAR PARKIR (FIX TOTAL)
+            KELUAR PARKIR
    =============================== */
 
 if (isset($_GET['keluar'])) {
@@ -95,6 +95,8 @@ if ($qTarif->num_rows > 0) {
 }
 
     // ================= HITUNG TOTAL =================
+
+    // Pengguna kendaraan tidak atau belum terdaftar (untuk tamu)
         if ($is_tamu) {
 
             $total = 4000;
@@ -103,7 +105,9 @@ if ($qTarif->num_rows > 0) {
                 $tambahan = ceil(($durasi - 1) / 4) * 1500;
                 $total += $tambahan;
             }
+    // Jadi jam pertama itu 4.000 dan akan terus bertambah 1.500 setiap blok waktu 4 jam berikutnya
 
+    // Pengguna kendaraan yang sudah terdaftar
         } else {
 
             if ($durasi <= 24) {
@@ -123,6 +127,13 @@ if ($qTarif->num_rows > 0) {
                 $harga_sisa = $blok_sisa * $tarif_per_jam;
 
                 $total = $harga_diskon_24 + $harga_sisa;
+
+            // Jadi kendaraan di 4 jam pertama tarifnya akan menyesuaikan dengan kendaraan
+            // dan akan bertambah dengan harga tarif tersebut setiap blok waktu 4 jam berikutnya
+
+            // Tapi, semisal pengguna parkir yang sudah terdaftar memparkirkan kendaraan selama 24 jam,
+            // pengguna tersebut mendapat diskon sebesar 75%.
+
             }
         }
 
@@ -211,6 +222,8 @@ $users_dropdown = $conn->query("
 /* ===============================
    INPUT USERNAME ATAU PLAT
    =============================== */
+
+/* Untuk pengguna kendaraan yang tidak terdaftar, alias tamu */
 
 $username = trim($_POST['username'] ?? '');
 $plat     = strtoupper(trim($_POST['plat_nomor'] ?? ''));
@@ -307,7 +320,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($username !== '' || $plat !== ''))
 
         if ($message === '') {
 
-    // Cek dulu: ada area yang tidak ditutup?
+    // Cek Area: ada area yang tidak ditutup?
     $cekAreaAktif = $conn->query("
         SELECT id_area
         FROM tb_area_parkir
@@ -680,6 +693,7 @@ if (empty($data_tiket) && isset($_SESSION['tiket_terakhir'])) {
 
 
 <script>
+
 // Jam Digital
 function updateDigitalTime() {
     const now = new Date();
@@ -707,7 +721,7 @@ updateDigitalTime();
     document.getElementById("current-time").textContent = timeStr;
   }
 
-  // Posisi angka secara melingkar
+  // Posisi angka agar rapi
   function positionClockNumbers() {
     const numbers = document.querySelectorAll(".clock-number");
     const centerX = 125;

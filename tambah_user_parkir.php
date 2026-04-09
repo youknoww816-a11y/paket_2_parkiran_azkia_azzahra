@@ -16,7 +16,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     exit();
 }
 
-/* ================= EDIT LOAD ================= */
+/* ================= EDIT ================= */
 $edit_mode = false;
 $edit_id = $edit_nama_lengkap = $edit_username = $edit_role = '';
 
@@ -258,7 +258,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     });
 </script>
 
-<!--Searchbox/Searchbar. . . intinya cari -->
+<!-- Searchbox/Searchbar -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const searchBox = document.getElementById("searchBox");
@@ -273,10 +273,9 @@ document.addEventListener("DOMContentLoaded", function () {
             let text = "";
 
             if (type === "username") {
-                // Username (kolom ke-3)
                 text = row.cells[2].innerText.toLowerCase();
+
             } else if (type === "pemilik") {
-                // Nama Lengkap (kolom ke-2)
                 text = row.cells[1].innerText.toLowerCase();
             }
 
@@ -289,8 +288,3 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
-
-<!-- Note :
-        Yup, password user itu gampang untuk diubah KALAU kamu itu admin
-        makanya kita perlu orang yang jujur dan hati-hati jangan sampai kaya pem-(isi sendiri)
--->

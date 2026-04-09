@@ -3,13 +3,12 @@ session_start();
 include 'koneksi_parkir.php';
 
 /* ============================
-   CEK APAKAH USER SUDAH LOGIN
-   (HARUS SAMA DENGAN login_parkir.php)
+   CEK LOGIN
    ============================ */
 
 if (!isset($_SESSION['id_user']) || !isset($_SESSION['role'])) {
     
-    // ❌ Belum login → ke halaman login
+    // Belum login akan melahkukan direct ke halaman login
     header("Location: login_parkir.php");
     exit();
 }
@@ -36,7 +35,6 @@ switch ($role) {
         break;
 
     default:
-        // Role tidak dikenal → logout demi keamanan
         session_destroy();
         header("Location: login_parkir.php");
         break;

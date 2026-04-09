@@ -7,7 +7,7 @@ include 'koneksi_parkir.php';
 include 'proteksi_role_parkir.php';
 
 /* ===============================
-   1. FILTER TANGGAL
+        FILTER TANGGAL
 ================================ */
 
 if (!empty($_GET['start_date']) && !empty($_GET['end_date'])) {
@@ -32,14 +32,13 @@ $end_datetime   = $end_date . ' 23:59:59';
 $start_date_month = $start_date;
 $end_date_month   = $end_date;
 
-// Kalau user pakai custom range
 if (!empty($_GET['start_date']) && !empty($_GET['end_date'])) {
     $start_date_month = $_GET['start_date'];
     $end_date_month   = $_GET['end_date'];
 }
 
 /* ===============================
-   2. QUERY DETAIL AKTIVITAS
+       QUERY DETAIL AKTIVITAS
 ================================ */
 
 $sql = "
@@ -118,7 +117,7 @@ $stmt->execute();
 $result_aktivitas = $stmt->get_result();
 
 /* ===============================
-   3. RINGKASAN DATA
+          RINGKASAN DATA
 ================================ */
 
 // Total kendaraan masuk
@@ -330,6 +329,8 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
 
         ?>
 
+    <!-- Tampilan tarifnya selalu enggak sesuai database, jadi aku ubah begini sesuai sama tb_tarif untuk menampilkan data
+         Jumlah totalnya udah sesuai sama tarifnya, aku enggak tau kenapa bisa begitu -->
         <?php
         $isManual = empty($row['id_kendaraan']);
         
@@ -348,7 +349,7 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
                 $tarif = 6000;
             
             } else {
-                $tarif = 0; // fallback kalau data aneh
+                $tarif = 0;
             }
         }
     ?>
@@ -402,7 +403,7 @@ $g_total_transaksi = $g_total_transaksi ?? 0;
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 
-<!-- Toolbar agar bisa bekerja -->
+<!-- Toolbar -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -523,6 +524,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+<!-- PRINT DAN EXPORT EXCEL MENYESUAIKAN DATA DROPDOWN-->
 <script>
 $(document).ready(function(){
 

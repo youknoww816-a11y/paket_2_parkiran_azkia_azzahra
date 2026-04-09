@@ -40,8 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_area'])) {
     $status = $_POST['status_area'];
     $kapasitas = $_POST['kapasitas'];
 
-    
-// Ambil data terisi dulu
 $cek = $conn->query("
     SELECT terisi FROM tb_area_parkir WHERE id_area = $id_area
 ");

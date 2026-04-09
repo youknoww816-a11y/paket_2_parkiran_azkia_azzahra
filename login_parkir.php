@@ -34,16 +34,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($result->num_rows === 1) {
                 $user = $result->fetch_assoc();
 
-                // 🔒 Status akun aktif?
+                // Memeriksa akun aktif?
                 if ((int)$user['status_aktif'] !== 1) {
                     $message = "Akun tidak aktif. Hubungi admin.";
                 }
-                // 🔐 Password sudah benar?
+                // Memeriksa apakah password sesuai?
                 elseif (!password_verify($password, $user['password'])) {
                     $message = "Password salah.";
                 }
                 else {
-                    // ✅ Login berhasil yay 😀
+                    // Login berhasil yay 😀
                     session_regenerate_id(true);
 
                     $_SESSION['id_user']       = $user['id_user'];

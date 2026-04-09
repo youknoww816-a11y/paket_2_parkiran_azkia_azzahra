@@ -1127,12 +1127,6 @@ hr {
     color: #212529;
     margin: 0;
 }
-.summary-card.keterlambatan-summary,
-.summary-card.total-waktu-summary,
-.summary-card.unique-late-summary {
-    background: none;
-    border-color: #e0e0e0;
-}
 
 .loading-overlay {
     display: none;

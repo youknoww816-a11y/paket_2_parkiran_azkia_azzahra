@@ -10,3 +10,8 @@ if ($conn->connect_error) {
     die("Koneksi gagal: " . $conn->connect_error);
 }
 ?>
+
+<!-- Note :
+            Koneksi localhost sama koneksi di infinityfree beda
+            Jangan sampai lupa
+-->
